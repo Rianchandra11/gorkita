@@ -1,17 +1,25 @@
-import 'package:http/http.dart' as http;
-import 'package:uts_backend/helper/base_url.dart';
-import 'dart:convert';
-
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:uts_backend/model/mabar_model.dart';
+import 'package:uts_backend/model/venue_model.dart';
 
 class MabarRepository {
-  static Future<List<MabarModel>> getAll() async {
-    final String pathName = "/display/mabar";
+  static Future<List<MabarModel>> get() async {
+    List<MabarModel> data = [];
+    FirebaseFirestore db = FirebaseFirestore.instance;
     try {
-      var response = await http.get(Uri.parse("${BaseUrl.url}$pathName"));
-      List<dynamic> result = jsonDecode(response.body)['data'];
-      await Future.delayed(Duration(seconds: 1));
-      return result.map((e) => MabarModel.fromJson(e)).toList();
+      final result = await db
+          .collection("casual_matches")
+          .withConverter(
+            fromFirestore: MabarModel.fromFirestore,
+            toFirestore: (MabarModel mabar, options) => mabar.toFirestore(),
+          )
+          .get();
+
+      for (var doc in result.docs) {
+        data.add(doc.data());
+      }
+
+      return data;
     } catch (e) {
       rethrow;
     }

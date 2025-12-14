@@ -17,7 +17,7 @@ class _VenueListScreenState extends State<VenueListScreen> {
   TextEditingController search = TextEditingController();
 
   getData() async {
-    initList = await VenueRepository.getAll();
+    initList = await VenueRepository.get();
     setState(() {
       listVenue = initList;
     });
@@ -28,13 +28,9 @@ class _VenueListScreenState extends State<VenueListScreen> {
       listVenue = initList;
     } else {
       setState(() {
-        listVenue =
-            initList
-                .where(
-                  (x) =>
-                      x.namaVenue.toLowerCase().contains(keyword.toLowerCase()),
-                )
-                .toList();
+        listVenue = initList
+            .where((x) => x.nama!.toLowerCase().contains(keyword.toLowerCase()))
+            .toList();
       });
     }
     setState(() {});
@@ -82,48 +78,44 @@ class _VenueListScreenState extends State<VenueListScreen> {
           ),
         ),
       ),
-      body:
-          initList.isEmpty
-              ? Center(child: CircularProgressIndicator())
-              : listVenue.isEmpty
-              ? Center(child: Text("Pencarian Anda tidak ditemukan"))
-              : Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16.0, 12, 0, 8.0),
-                    child: Row(
-                      children: [
-                        Text(
-                          "Menampilkan ",
-                          style: TextStyle(
-                            color: Colors.grey[800],
-                            fontSize: 14,
-                          ),
+      body: initList.isEmpty
+          ? Center(child: CircularProgressIndicator())
+          : listVenue.isEmpty
+          ? Center(child: Text("Pencarian Anda tidak ditemukan"))
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16.0, 12, 0, 8.0),
+                  child: Row(
+                    children: [
+                      Text(
+                        "Menampilkan ",
+                        style: TextStyle(color: Colors.grey[800], fontSize: 14),
+                      ),
+                      Text(
+                        "${listVenue.length} Venue",
+                        style: TextStyle(
+                          color: Colors.grey[800],
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
                         ),
-                        Text(
-                          "${listVenue.length} Venue",
-                          style: TextStyle(
-                            color: Colors.grey[800],
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                  Expanded(
-                    child: ListView.builder(
-                      padding: const EdgeInsets.only(top: 8.0),
-                      itemCount: listVenue.length,
-                      itemBuilder: (context, index) {
-                        final venue = listVenue[index];
-                        return _buildVenueCard(venue);
-                      },
-                    ),
+                ),
+                Expanded(
+                  child: ListView.builder(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    itemCount: listVenue.length,
+                    itemBuilder: (context, index) {
+                      final venue = listVenue[index];
+                      return _buildVenueCard(venue);
+                    },
                   ),
-                ],
-              ),
+                ),
+              ],
+            ),
     );
   }
 
@@ -166,7 +158,7 @@ class _VenueListScreenState extends State<VenueListScreen> {
       onTap: () {
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) => VenueDetailScreen(id: venue.venueId),
+            builder: (context) => VenueDetailScreen(id: venue.venueId!),
           ),
         );
       },
@@ -178,7 +170,7 @@ class _VenueListScreenState extends State<VenueListScreen> {
             ClipRRect(
               borderRadius: BorderRadius.circular(8.0),
               child: Image.network(
-                venue.url,
+                venue.linkGambar![0],
                 width: 115,
                 height: 150,
                 fit: BoxFit.cover,
@@ -196,7 +188,7 @@ class _VenueListScreenState extends State<VenueListScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          venue.namaVenue,
+                          venue.nama!,
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
@@ -254,7 +246,7 @@ class _VenueListScreenState extends State<VenueListScreen> {
                         Row(
                           children: [
                             Text(
-                              "${NumberFormatter.currency(int.parse(venue.hargaPerjam))}",
+                              NumberFormatter.currency(venue.harga!),
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16,

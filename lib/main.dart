@@ -2,12 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:uts_backend/database/firebase_option.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:uts_backend/insert_dummy.dart';
+import 'package:uts_backend/pages/booking/choose_booking_schedule_screen.dart';
+import 'package:uts_backend/pages/home.dart';
 import 'package:uts_backend/pages/splash.dart';
 import 'package:uts_backend/database/providers/provider.dart';
 import 'package:uts_backend/database/providers/theme_provider.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
-
+import 'package:uts_backend/pages/venue_detail_screen.dart';
+import 'package:uts_backend/pages/venue_list_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,9 +22,7 @@ Future<void> main() async {
       print('Firebase app already exists, skipping initialization');
     } catch (e) {
       print('Initializing Firebase...');
-      await Firebase.initializeApp(
-        options: DefaultFirebaseOptions.android,
-      );
+      await Firebase.initializeApp(options: DefaultFirebaseOptions.android);
       print('Firebase initialized successfully');
     }
   } catch (e) {
@@ -89,10 +91,8 @@ class MyApp extends StatelessWidget {
         scaffoldBackgroundColor: Colors.black,
       ),
       themeMode: themeProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light,
-      home: const SplashScreen(),
-      navigatorObservers: [
-        FirebaseAnalyticsObserver(analytics: analytics),
-      ],
+      home: HomeScreen(id: 0),
+      navigatorObservers: [FirebaseAnalyticsObserver(analytics: analytics)],
     );
   }
 }

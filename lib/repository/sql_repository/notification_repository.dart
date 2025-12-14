@@ -1,7 +1,7 @@
 import 'package:http/http.dart' as http;
 import 'package:uts_backend/helper/base_url.dart';
 import 'dart:convert';
-import 'package:uts_backend/model/notification_model.dart';
+import 'package:uts_backend/model/sql_model/notification_model.dart';
 
 class NotificationRepository {
   static Future<List<NotificationModel>> getAll() async {

@@ -1,5 +1,5 @@
 import 'package:uts_backend/database/database_service.dart';
-import 'package:uts_backend/model/mabar_model.dart'; 
+import 'package:uts_backend/model/sql_model/mabar_model.dart';
 
 class TableMabar {
   ApiService dbService = ApiService();
@@ -7,7 +7,7 @@ class TableMabar {
   Future<List<MabarModel>> getAll() async {
     try {
       final result = await dbService.getMabarList();
-      
+
       if (result['success'] == true) {
         final List<dynamic> data = result['data'];
         return data.map((e) => MabarModel.fromJson(e)).toList();

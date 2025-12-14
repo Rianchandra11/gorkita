@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:uts_backend/model/notification_model.dart';
-import 'package:uts_backend/repository/notification_repository.dart';
+import 'package:uts_backend/model/sql_model/notification_model.dart';
+import 'package:uts_backend/repository/sql_repository/notification_repository.dart';
 
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({super.key});
@@ -75,19 +75,19 @@ class _NotificationScreenState extends State<NotificationScreen> {
         actions: [
           selectMode
               ? IconButton(
-                onPressed: () async {
-                  for (int i = 0; i < selectedId.length; i++) {
-                    await NotificationRepository.deleteById(selectedId[i]);
-                  }
-                  _notifFuture = NotificationRepository.getAll();
-                  setState(() {
-                    selectMode = false;
-                    selectedId = [];
-                    isChanged = true;
-                  });
-                },
-                icon: Icon(Icons.delete),
-              )
+                  onPressed: () async {
+                    for (int i = 0; i < selectedId.length; i++) {
+                      await NotificationRepository.deleteById(selectedId[i]);
+                    }
+                    _notifFuture = NotificationRepository.getAll();
+                    setState(() {
+                      selectMode = false;
+                      selectedId = [];
+                      isChanged = true;
+                    });
+                  },
+                  icon: Icon(Icons.delete),
+                )
               : SizedBox.shrink(),
         ],
       ),
@@ -102,58 +102,58 @@ class _NotificationScreenState extends State<NotificationScreen> {
           return data.isEmpty
               ? Center(child: Text("Belum ada pesan"))
               : Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                child: ListView.builder(
-                  itemCount: data.length,
-                  itemBuilder: (context, index) {
-                    final String pesan = data[index].pesan;
-                    final DateTime tanggal = data[index].tanggal;
-                    final int id = data[index].notifId;
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  child: ListView.builder(
+                    itemCount: data.length,
+                    itemBuilder: (context, index) {
+                      final String pesan = data[index].pesan;
+                      final DateTime tanggal = data[index].tanggal;
+                      final int id = data[index].notifId;
 
-                    return ListTile(
-                      tileColor: selectMode ? Colors.grey[300] : Colors.white,
-                      leading: const CircleAvatar(
-                        radius: 24,
-                        backgroundColor: Color.fromRGBO(21, 116, 42, 1),
-                        foregroundColor: Colors.white,
-                        child: Icon(Icons.headset_mic),
-                      ),
-                      title: Text(
-                        pesan,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          fontSize: 14,
+                      return ListTile(
+                        tileColor: selectMode ? Colors.grey[300] : Colors.white,
+                        leading: const CircleAvatar(
+                          radius: 24,
+                          backgroundColor: Color.fromRGBO(21, 116, 42, 1),
+                          foregroundColor: Colors.white,
+                          child: Icon(Icons.headset_mic),
                         ),
-                      ),
-                      subtitle: Text(
-                        getTimeAgo(tanggal),
-                        style: const TextStyle(
-                          color: Color.fromRGBO(76, 76, 76, 1),
-                          fontSize: 14,
+                        title: Text(
+                          pesan,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontWeight: FontWeight.w500,
+                            fontSize: 14,
+                          ),
                         ),
-                      ),
-                      onLongPress: () {
-                        setState(() {
-                          selectMode = true;
-                          selectedId.add(id);
-                        });
-                      },
-                      onTap: () {
-                        if (selectMode) {
+                        subtitle: Text(
+                          getTimeAgo(tanggal),
+                          style: const TextStyle(
+                            color: Color.fromRGBO(76, 76, 76, 1),
+                            fontSize: 14,
+                          ),
+                        ),
+                        onLongPress: () {
                           setState(() {
-                            selectedId.remove(id);
-                            if (selectedId.isEmpty) {
-                              selectMode = false;
-                            }
+                            selectMode = true;
+                            selectedId.add(id);
                           });
-                        }
-                      },
-                    );
-                  },
-                ),
-              );
+                        },
+                        onTap: () {
+                          if (selectMode) {
+                            setState(() {
+                              selectedId.remove(id);
+                              if (selectedId.isEmpty) {
+                                selectMode = false;
+                              }
+                            });
+                          }
+                        },
+                      );
+                    },
+                  ),
+                );
         },
       ),
     );
