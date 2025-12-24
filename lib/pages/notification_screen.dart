@@ -1,6 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:uts_backend/model/sql_model/notification_model.dart';
-import 'package:uts_backend/repository/sql_repository/notification_repository.dart';
+import 'package:provider/provider.dart';
+import 'package:uts_backend/providers/unread_notification_provider.dart';
+import 'package:uts_backend/model/notification_model.dart';
+import 'package:uts_backend/repository/notification_repository.dart';
 
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({super.key});
@@ -11,8 +14,7 @@ class NotificationScreen extends StatefulWidget {
 
 class _NotificationScreenState extends State<NotificationScreen> {
   bool selectMode = false;
-  List<int> selectedId = [];
-  bool isChanged = false;
+  List<String> selectedId = [];
 
   String getTimeAgo(DateTime time) {
     DateTime receive = time;
@@ -32,16 +34,27 @@ class _NotificationScreenState extends State<NotificationScreen> {
     }
   }
 
-  late Future<List<NotificationModel>> _notifFuture;
+  void updateUnreadNotification(
+    List<QueryDocumentSnapshot<NotificationModel>> snapshot,
+    UnreadNotificationProvider provider,
+  ) async {
+    provider.stopScheduleNotification();
+    NotificationRepository.updateUnreadNotification();
+  }
+
+  late Future<List<QueryDocumentSnapshot<NotificationModel>>> _notifFuture;
 
   @override
   void initState() {
-    _notifFuture = NotificationRepository.getAll();
+    _notifFuture = NotificationRepository.getAll(22);
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+    UnreadNotificationProvider provider = context
+        .read<UnreadNotificationProvider>();
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -67,7 +80,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                 selectedId = [];
               });
             } else {
-              Navigator.pop(context, isChanged);
+              Navigator.pop(context);
             }
           },
         ),
@@ -76,14 +89,13 @@ class _NotificationScreenState extends State<NotificationScreen> {
           selectMode
               ? IconButton(
                   onPressed: () async {
-                    for (int i = 0; i < selectedId.length; i++) {
-                      await NotificationRepository.deleteById(selectedId[i]);
-                    }
-                    _notifFuture = NotificationRepository.getAll();
+                    await NotificationRepository.deleteSelectedNotifications(
+                      selectedId,
+                    );
+                    _notifFuture = NotificationRepository.getAll(1);
                     setState(() {
                       selectMode = false;
                       selectedId = [];
-                      isChanged = true;
                     });
                   },
                   icon: Icon(Icons.delete),
@@ -97,63 +109,66 @@ class _NotificationScreenState extends State<NotificationScreen> {
           if (asyncSnapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
           }
-          final data = asyncSnapshot.data!;
 
-          return data.isEmpty
-              ? Center(child: Text("Belum ada pesan"))
-              : Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  child: ListView.builder(
-                    itemCount: data.length,
-                    itemBuilder: (context, index) {
-                      final String pesan = data[index].pesan;
-                      final DateTime tanggal = data[index].tanggal;
-                      final int id = data[index].notifId;
+          if (asyncSnapshot.data!.isEmpty) {
+            return Center(child: Text("Belum ada pesan"));
+          } else {
+            updateUnreadNotification(asyncSnapshot.data!, provider);
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: ListView.builder(
+                itemCount: asyncSnapshot.data!.length,
+                itemBuilder: (context, index) {
+                  final data = asyncSnapshot.data![index].data();
+                  final String pesan = data.body!;
+                  final DateTime tanggal = data.createdAt!;
+                  final String id = asyncSnapshot.data![index].id;
 
-                      return ListTile(
-                        tileColor: selectMode ? Colors.grey[300] : Colors.white,
-                        leading: const CircleAvatar(
-                          radius: 24,
-                          backgroundColor: Color.fromRGBO(21, 116, 42, 1),
-                          foregroundColor: Colors.white,
-                          child: Icon(Icons.headset_mic),
-                        ),
-                        title: Text(
-                          pesan,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontWeight: FontWeight.w500,
-                            fontSize: 14,
-                          ),
-                        ),
-                        subtitle: Text(
-                          getTimeAgo(tanggal),
-                          style: const TextStyle(
-                            color: Color.fromRGBO(76, 76, 76, 1),
-                            fontSize: 14,
-                          ),
-                        ),
-                        onLongPress: () {
-                          setState(() {
-                            selectMode = true;
-                            selectedId.add(id);
-                          });
-                        },
-                        onTap: () {
-                          if (selectMode) {
-                            setState(() {
-                              selectedId.remove(id);
-                              if (selectedId.isEmpty) {
-                                selectMode = false;
-                              }
-                            });
-                          }
-                        },
-                      );
+                  return ListTile(
+                    tileColor: selectMode ? Colors.grey[300] : Colors.white,
+                    leading: const CircleAvatar(
+                      radius: 24,
+                      backgroundColor: Color.fromRGBO(21, 116, 42, 1),
+                      foregroundColor: Colors.white,
+                      child: Icon(Icons.headset_mic),
+                    ),
+                    title: Text(
+                      pesan,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 14,
+                      ),
+                    ),
+                    subtitle: Text(
+                      getTimeAgo(tanggal),
+                      style: const TextStyle(
+                        color: Color.fromRGBO(76, 76, 76, 1),
+                        fontSize: 14,
+                      ),
+                    ),
+                    onLongPress: () {
+                      setState(() {
+                        selectMode = true;
+                        selectedId.add(id);
+                      });
                     },
-                  ),
-                );
+                    onTap: () {
+                      if (selectMode) {
+                        setState(() {
+                          selectedId.remove(id);
+                          if (selectedId.isEmpty) {
+                            selectMode = false;
+                          }
+                        });
+                      }
+                    },
+                  );
+                },
+              ),
+            );
+          }
         },
       ),
     );

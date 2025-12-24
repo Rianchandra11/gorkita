@@ -1,7 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:uts_backend/model/booking_model.dart';
-import 'package:uts_backend/model/venue_model.dart';
-import 'package:uts_backend/repository/venue_repository.dart';
 
 class UserRepository {
   static Future<List<BookingModel>?> getBookingSchedule(int id) async {

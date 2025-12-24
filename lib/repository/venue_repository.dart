@@ -62,7 +62,7 @@ class VenueRepository {
   }) async {
     try {
       FirebaseFirestore db = FirebaseFirestore.instance;
-      final result = await db.collection("bookings").add({
+      await db.collection("bookings").add({
         "venue_id": venueId,
         "penyewa": {"user_id": userId, "nama": nama},
         "lapangan": lapangan,

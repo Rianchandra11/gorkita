@@ -1,13 +1,12 @@
 name: uts_backend
 description: "A new Flutter project."
-publish_to: 'none'
+publish_to: "none"
 version: 0.1.0
 
 environment:
   sdk: ^3.8.1
 
 dependencies:
-
   carousel_slider: ^5.1.1
   cloud_firestore: ^6.1.0
   cupertino_icons: ^1.0.8
@@ -30,7 +29,7 @@ dependencies:
   skeletonizer: ^2.1.0+1
   sqflite: ^2.4.2
   table_sticky_headers: ^2.0.5
-
+  awesome_notifications: ^0.10.0
 
 dev_dependencies:
   flutter_lints: ^5.0.0
@@ -41,7 +40,6 @@ dev_dependencies:
 # following page: https://dart.dev/tools/pub/pubspec
 # The following section is specific to Flutter packages.
 flutter:
-
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
@@ -91,4 +89,3 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
-

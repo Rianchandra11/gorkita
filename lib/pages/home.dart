@@ -1,13 +1,14 @@
+import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:uts_backend/model/sparring_model.dart';
 import 'package:uts_backend/model/venue_model.dart';
-import 'package:uts_backend/pages/notification_screen.dart';
 import 'package:uts_backend/pages/profil.dart';
 import 'package:uts_backend/pages/venue_list_screen.dart';
 import 'package:uts_backend/repository/sparring_repository.dart';
 import 'package:uts_backend/repository/venue_repository.dart';
 import 'package:uts_backend/widgets/mabar_card.dart';
+import 'package:uts_backend/widgets/notification_button.dart';
 import 'package:uts_backend/widgets/quick_menu_item.dart';
 import 'package:uts_backend/widgets/skeletons/sparring_card_skeleton.dart';
 import 'package:uts_backend/widgets/skeletons/sparring_news_card_skeleton.dart';
@@ -30,92 +31,19 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   TextEditingController searchInput = TextEditingController();
   int currentPage = 0;
-  bool notif = false;
-
-  // --- DATA DUMMY (Langsung diinisialisasi) ---
-  final List<Map<String, dynamic>> _venues = [
-    {
-      'venue_id': 1,
-      'url': 'https://placehold.co/600x400/png',
-      'nama_venue': 'GOR Cendrawasih',
-      'kota': 'Jakarta Barat',
-      'harga_perjam': 50000,
-      'total_rating': 120,
-      'rating': 4.5,
-    },
-    {
-      'venue_id': 2,
-      'url': 'https://placehold.co/600x400/png',
-      'nama_venue': 'Arena Badminton Jaya',
-      'kota': 'Jakarta Selatan',
-      'harga_perjam': 75000,
-      'total_rating': 85,
-      'rating': 4.8,
-    },
-    {
-      'venue_id': 3,
-      'url': 'https://placehold.co/600x400/png',
-      'nama_venue': 'Hall Sport Center',
-      'kota': 'Bandung',
-      'harga_perjam': 60000,
-      'total_rating': 200,
-      'rating': 4.2,
-    },
-  ];
-
-  final List<Map<String, dynamic>> _sparrings = [
-    {
-      'search_player': 'Budi Santoso, Ahmad',
-      'nama_tim': 'Tim Rajawali',
-      'tanggal': DateTime.now().add(const Duration(days: 2)).toString(),
-      'minimum_available_time': '18:00:00',
-      'maximum_available_time': '21:00:00',
-      'provinsi': 'DKI Jakarta',
-      'kota': 'Jakarta Timur',
-      'kategori': 'Ganda Putra',
-    },
-    {
-      'search_player': 'Siti Nurhaliza',
-      'nama_tim': 'PB Djarum Kw',
-      'tanggal': DateTime.now().add(const Duration(days: 3)).toString(),
-      'minimum_available_time': '10:00:00',
-      'maximum_available_time': '12:00:00',
-      'provinsi': 'Jawa Barat',
-      'kota': 'Depok',
-      'kategori': 'Tunggal Putri',
-    },
-  ];
-
-  final List<Map<String, dynamic>> _sparringNews = [
-    {
-      'tanggal': DateTime.now().subtract(const Duration(days: 1)).toString(),
-      'maximum_available_time': '14:30:00',
-      'kota': 'Jakarta',
-      'player_a': 'John Doe, Mike Smith',
-      'player_b': 'Jane Doe, Sarah Wilson',
-      'skor_set1': '21-19',
-      'skor_set2': '21-18',
-      'skor_set3': null,
-      'kategori': 'Ganda Campuran',
-    },
-    {
-      'tanggal': DateTime.now().subtract(const Duration(days: 2)).toString(),
-      'maximum_available_time': '16:00:00',
-      'kota': 'Bandung',
-      'player_a': 'Ahmad Rizki',
-      'player_b': 'Budi Santoso',
-      'skor_set1': '21-15',
-      'skor_set2': '19-21',
-      'skor_set3': '21-17',
-      'kategori': 'Tunggal Putra',
-    },
-  ];
 
   @override
   void initState() {
     super.initState();
-    // Set notifikasi aktif secara default untuk dummy
-    notif = true;
+
+    AwesomeNotifications().isNotificationAllowed().then((isAllowed) {
+      if (!isAllowed) {
+        // This is just a basic example. For real apps, you must show some
+        // friendly dialog box before call the request method.
+        // This is very important to not harm the user experience
+        AwesomeNotifications().requestPermissionToSendNotifications();
+      }
+    });
   }
 
   @override
@@ -127,9 +55,7 @@ class _HomeScreenState extends State<HomeScreen> {
         Widget halamanProfil = Profil(id: widget.id);
         return Scaffold(
           backgroundColor: isDark ? Colors.black87 : Colors.white,
-          body: currentPage != 0
-              ? halamanProfil
-              : _buildHomeContent(isDark), // Langsung render konten
+          body: currentPage != 0 ? halamanProfil : _buildHomeContent(isDark),
           bottomNavigationBar: BottomNavigationBar(
             backgroundColor: isDark ? Colors.grey[900] : Colors.white,
             items: const <BottomNavigationBarItem>[
@@ -176,51 +102,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       height: 60,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(right: 4),
-                            child: IconButton(
-                              onPressed: () async {
-                                bool? result = await Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        const NotificationScreen(),
-                                  ),
-                                );
-                                if (result == true) {
-                                  setState(() {
-                                    notif = false;
-                                  });
-                                }
-                              },
-                              icon: Stack(
-                                children: [
-                                  const Icon(
-                                    Icons.notifications_none,
-                                    size: 26,
-                                    color: Colors.white,
-                                  ),
-                                  notif
-                                      ? Positioned(
-                                          top: 1,
-                                          right: 1,
-                                          child: Container(
-                                            width: 10,
-                                            height: 10,
-                                            decoration: BoxDecoration(
-                                              color: Colors.red,
-                                              borderRadius:
-                                                  BorderRadius.circular(5),
-                                            ),
-                                          ),
-                                        )
-                                      : const SizedBox.shrink(),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
+                        children: [NotificationButton()],
                       ),
                     ),
 

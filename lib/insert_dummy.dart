@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 class InsertDummy extends StatefulWidget {
@@ -6100,11 +6099,11 @@ class _InsertDummyState extends State<InsertDummy> {
     try {
       print("Mulai Proses Input");
 
-      // insertToBatch("users", user);
-      // insertToBatch("venues", venue);
-      // insertToBatch("casual_matches", mabar);
-      // insertToBatch("sparrings", sparring);
-      // insertToBatch("facilities", facility);
+      insertToBatch("users", user);
+      insertToBatch("venues", venue);
+      insertToBatch("casual_matches", mabar);
+      insertToBatch("sparrings", sparring);
+      insertToBatch("facilities", facility);
       insertToBatch("bookings", bookingSchedule);
 
       print("Semua Data Telah Masuk dalam Batch");
