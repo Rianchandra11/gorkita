@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:uts_backend/helper/date_formatter.dart';
 import 'package:uts_backend/helper/datetime_extension.dart';
 import 'package:uts_backend/helper/number_formatter.dart';
@@ -40,6 +41,7 @@ class _ChooseBookingScheduleScreenState
   List selectedSchedule = [];
   late Stream<QuerySnapshot<BookingModel>> bookedScheduleStream;
   bool _isLoading = false;
+  InterstitialAd? _interstitialAd;
 
   void getDateList() {
     DateTime now = DateTime(
@@ -99,6 +101,34 @@ class _ChooseBookingScheduleScreenState
     );
   }
 
+  void _loadInterstitialAd() {
+    String _adUnitId = "ca-app-pub-3940256099942544/1033173712";
+
+    InterstitialAd.load(
+      adUnitId: _adUnitId,
+      request: const AdRequest(),
+      adLoadCallback: InterstitialAdLoadCallback(
+        onAdLoaded: (InterstitialAd ad) {
+          _interstitialAd = ad;
+
+          ad.fullScreenContentCallback = FullScreenContentCallback(
+            onAdDismissedFullScreenContent: (ad) {
+              ad.dispose();
+
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => HomeScreen(id: 0)),
+              );
+            },
+          );
+        },
+        onAdFailedToLoad: (LoadAdError error) {
+          debugPrint('Ad failed to load with error: $error');
+        },
+      ),
+    );
+  }
+
   @override
   void initState() {
     // TODO: implement initState
@@ -109,6 +139,7 @@ class _ChooseBookingScheduleScreenState
     jamTutup = int.parse(widget.jamOperasional.split(" - ")[1].substring(0, 2));
 
     _initStream();
+    _loadInterstitialAd();
   }
 
   @override
@@ -528,12 +559,7 @@ class _ChooseBookingScheduleScreenState
 
                           await Future.delayed(Duration(seconds: 2));
 
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => HomeScreen(id: 0),
-                            ),
-                          );
+                          _interstitialAd?.show();
                         },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: selectedSchedule.isEmpty
