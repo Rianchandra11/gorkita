@@ -34,6 +34,15 @@ Future<void> main() async {
       defaultColor: Colors.blue,
       ledColor: Colors.white,
     ),
+    NotificationChannel(
+      channelKey: 'booking_confirmation_channel',
+      channelName: 'Pengingat Konfirmasi Booking Berhasil',
+      channelDescription:
+          'Notifikasi pengingat jika data booking user berhasil diinput',
+      importance: NotificationImportance.High,
+      defaultColor: Colors.blue,
+      ledColor: Colors.white,
+    ),
   ], debug: true);
 
   try {

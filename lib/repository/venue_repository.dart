@@ -52,7 +52,7 @@ class VenueRepository {
     return result;
   }
 
-  static Future<Map<String, String>> insertBooking(
+  static Future<void> insertBooking(
     int venueId,
     int userId,
     String nama,
@@ -69,9 +69,8 @@ class VenueRepository {
         "jam_mulai": Timestamp.fromDate(jamMulai),
         "lama_booking": lamaBooking,
       });
-      return {"code": "1", "message": "Data berhasil diinput"};
     } catch (e) {
-      return {"code": "0", "message": e.toString()};
+      throw Exception("Gagal insert booking: $e");
     }
   }
 }
