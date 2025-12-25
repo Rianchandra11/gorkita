@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "9988108980",
+    "firebase_url": "https://berotaksenku-uts-default-rtdb.asia-southeast1.firebasedatabase.app",
     "project_id": "berotaksenku-uts",
     "storage_bucket": "berotaksenku-uts.firebasestorage.app"
   },
@@ -12,7 +13,20 @@
           "package_name": "com.example.uts_backend"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "9988108980-90mhcp7jclqngup3388oub884v9lkhot.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.uts_backend",
+            "certificate_hash": "02639d211b7c44f2a2a2c096ef2cbe3e24c2aeb9"
+          }
+        },
+        {
+          "client_id": "9988108980-4tdekaa36459c3eut4qvqcvu1kq9hcp7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDTNEWN3PceCd9YPjrIvxcyJM1yRvxzU9o"
@@ -20,7 +34,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "9988108980-4tdekaa36459c3eut4qvqcvu1kq9hcp7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

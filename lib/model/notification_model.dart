@@ -1,36 +1,41 @@
-import 'dart:convert';
-
-NotificationModel notificationModelFromJson(String str) =>
-    NotificationModel.fromJson(json.decode(str));
-
-String notificationModelToJson(NotificationModel data) =>
-    json.encode(data.toJson());
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class NotificationModel {
-  int notifId;
-  String pesan;
-  String pengirim;
-  DateTime tanggal;
+  final String? title;
+  final String? body;
+  final DateTime? createdAt;
+  final bool? isRead;
+  final int? userId;
 
   NotificationModel({
-    required this.notifId,
-    required this.pesan,
-    required this.pengirim,
-    required this.tanggal,
+    this.title,
+    this.body,
+    this.createdAt,
+    this.isRead,
+    this.userId,
   });
 
-  factory NotificationModel.fromJson(Map<String, dynamic> json) =>
-      NotificationModel(
-        notifId: json["notif_id"],
-        pesan: json["pesan"],
-        pengirim: json["pengirim"],
-        tanggal: DateTime.parse(json["tanggal"]),
-      );
+  factory NotificationModel.fromFirestore(
+    DocumentSnapshot<Map<String, dynamic>> snapshot,
+    SnapshotOptions? options,
+  ) {
+    final data = snapshot.data();
+    return NotificationModel(
+      title: data?['title'],
+      body: data?['body'],
+      createdAt: (data?['createdAt'] as Timestamp?)?.toDate(),
+      isRead: data?['isRead'],
+      userId: data?['user_id'],
+    );
+  }
 
-  Map<String, dynamic> toJson() => {
-    "notif_id": notifId,
-    "pesan": pesan,
-    "pengirim": pengirim,
-    "tanggal": tanggal.toIso8601String(),
-  };
+  Map<String, dynamic> toFirestore() {
+    return {
+      if (title != null) "title": title,
+      if (body != null) "body": body,
+      if (createdAt != null) "createdAt": Timestamp.fromDate(createdAt!),
+      if (isRead != null) "isRead": isRead,
+      if (userId != null) "user_id": userId,
+    };
+  }
 }

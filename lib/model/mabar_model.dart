@@ -1,66 +1,116 @@
-import 'dart:convert';
-
-MabarModel mabarModelFromJson(String str) =>
-    MabarModel.fromJson(json.decode(str));
-
-String mabarModelToJson(MabarModel data) => json.encode(data.toJson());
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class MabarModel {
-  int mabarId;
-  String judul;
-  String levelMinimum;
-  String levelMaksimum;
-  DateTime tanggal;
-  String jamMulai;
-  String jamSelesai;
-  int capacity;
-  String namaVenue;
-  String kota;
-  String host;
-  String register;
+  final int? mabarId;
+  final VenueMiniModel? venue;
+  final String? judul;
+  final String? levelMinimum;
+  final String? levelMaksimum;
+  final DateTime? tanggal;
+  final String? jamMulai;
+  final String? jamSelesai;
+  final int? capacity;
+  final List<MabarParticipant>? participants;
 
   MabarModel({
-    required this.mabarId,
-    required this.judul,
-    required this.levelMinimum,
-    required this.levelMaksimum,
-    required this.tanggal,
-    required this.jamMulai,
-    required this.jamSelesai,
-    required this.capacity,
-    required this.namaVenue,
-    required this.kota,
-    required this.host,
-    required this.register,
+    this.mabarId,
+    this.venue,
+    this.judul,
+    this.levelMinimum,
+    this.levelMaksimum,
+    this.tanggal,
+    this.jamMulai,
+    this.jamSelesai,
+    this.capacity,
+    this.participants,
   });
 
-  factory MabarModel.fromJson(Map<String, dynamic> json) => MabarModel(
-    mabarId: json["mabar_id"],
-    judul: json["judul"],
-    levelMinimum: json["level_minimum"],
-    levelMaksimum: json["level_maksimum"],
-    tanggal: DateTime.parse(json["tanggal"]),
-    jamMulai: json["jam_mulai"],
-    jamSelesai: json["jam_selesai"],
-    capacity: json["capacity"],
-    namaVenue: json["nama_venue"],
-    kota: json["kota"],
-    host: json["host"],
-    register: json["register"],
-  );
+  factory MabarModel.fromFirestore(
+    DocumentSnapshot<Map<String, dynamic>> snapshot,
+    SnapshotOptions? options,
+  ) {
+    final data = snapshot.data();
+    return MabarModel(
+      mabarId: data?['mabar_id'],
+      venue: data?['venue'] != null
+          ? VenueMiniModel.fromMap(data?['venue'])
+          : null,
+      judul: data?['judul'],
+      levelMinimum: data?['level_minimum'],
+      levelMaksimum: data?['level_maksimum'],
+      tanggal: DateTime.parse(data?['tanggal']),
+      jamMulai: data?['jam_mulai'],
+      jamSelesai: data?['jam_selesai'],
+      capacity: data?['capacity'],
+      participants: data?['participants'] is Iterable
+          ? (data?['participants'] as List)
+                .map((e) => MabarParticipant.fromMap(e))
+                .toList()
+          : null,
+    );
+  }
 
-  Map<String, dynamic> toJson() => {
-    "mabar_id": mabarId,
-    "judul": judul,
-    "level_minimum": levelMinimum,
-    "level_maksimum": levelMaksimum,
-    "tanggal": tanggal.toIso8601String(),
-    "jam_mulai": jamMulai,
-    "jam_selesai": jamSelesai,
-    "capacity": capacity,
-    "nama_venue": namaVenue,
-    "kota": kota,
-    "host": host,
-    "register": register,
-  };
+  Map<String, dynamic> toFirestore() {
+    return {
+      if (mabarId != null) "mabar_id": mabarId,
+      if (venue != null) "venue": venue!.toMap(),
+      if (judul != null) "judul": judul,
+      if (levelMinimum != null) "level_minimum": levelMinimum,
+      if (levelMaksimum != null) "level_maksimum": levelMaksimum,
+      if (tanggal != null) "tanggal": tanggal,
+      if (jamMulai != null) "jam_mulai": jamMulai,
+      if (jamSelesai != null) "jam_selesai": jamSelesai,
+      if (capacity != null) "capacity": capacity,
+      if (participants != null)
+        "participants": participants!.map((e) => e.toMap()).toList(),
+    };
+  }
+}
+
+class VenueMiniModel {
+  final int? venueId;
+  final String? nama;
+  final String? kota;
+
+  VenueMiniModel({this.venueId, this.nama, this.kota});
+
+  factory VenueMiniModel.fromMap(Map<String, dynamic> map) {
+    return VenueMiniModel(
+      venueId: map['venue_id'],
+      nama: map['nama'],
+      kota: map['kota'],
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      if (venueId != null) "venue_id": venueId,
+      if (nama != null) "nama": nama,
+      if (kota != null) "kota": kota,
+    };
+  }
+}
+
+class MabarParticipant {
+  final int? userId;
+  final String? name;
+  final String? status;
+
+  MabarParticipant({this.userId, this.name, this.status});
+
+  factory MabarParticipant.fromMap(Map<String, dynamic> map) {
+    return MabarParticipant(
+      userId: map['user_id'],
+      name: map['name'],
+      status: map['status'],
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      if (userId != null) "user_id": userId,
+      if (name != null) "name": name,
+      if (status != null) "status": status,
+    };
+  }
 }

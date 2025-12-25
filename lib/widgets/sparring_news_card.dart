@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_profile_picture/flutter_profile_picture.dart';
@@ -11,11 +13,10 @@ class SparringNewsCard extends StatelessWidget {
   final String? player1B;
   final String player2A;
   final String? player2B;
-  final String skorSet1;
-  final String? skorSet2;
-  final String? skorSet3;
   final String kategori;
-  final bool isDark; 
+  final bool isDark;
+  final List<int> skorPenantang;
+  final List<int> skorPenerima;
 
   const SparringNewsCard({
     super.key,
@@ -26,38 +27,24 @@ class SparringNewsCard extends StatelessWidget {
     required this.player2A,
     required this.player1B,
     required this.player2B,
-    required this.skorSet1,
-    required this.skorSet2,
-    required this.skorSet3,
     required this.tanggal,
-    required this.isDark, 
+    required this.isDark,
+    required this.skorPenantang,
+    required this.skorPenerima,
   });
 
   @override
   Widget build(BuildContext context) {
     final Color cardColor = isDark ? const Color(0xFF1E1E1E) : Colors.white;
     final Color textPrimary = isDark ? Colors.white : Colors.black87;
-    final Color textSecondary = isDark ? Colors.white70 : const Color.fromRGBO(76, 76, 76, 1);
+    final Color textSecondary = isDark
+        ? Colors.white70
+        : const Color.fromRGBO(76, 76, 76, 1);
     final Color dividerColor = isDark ? Colors.grey[700]! : Colors.grey[400]!;
     final Color kategoriBg = isDark ? Colors.grey[800]! : Colors.grey.shade100;
     final Color borderColor = isDark ? Colors.white24 : Colors.black12;
     final Color shadowColor = isDark ? Colors.black45 : Colors.black12;
     final Color verticalDividerColor = isDark ? Colors.white30 : Colors.black26;
-
-    List<int>? getSetList(String? skorSet) {
-      if (skorSet == null) return null;
-      final List<String> skorList = skorSet.split(",");
-      if (skorList.length < 2) return null;
-      try {
-        return [int.parse(skorList[0]), int.parse(skorList[1])];
-      } catch (e) {
-        return null;
-      }
-    }
-
-    final List<int>? set1List = getSetList(skorSet1);
-    final List<int>? set2List = getSetList(skorSet2);
-    final List<int>? set3List = getSetList(skorSet3);
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 2, horizontal: 8),
@@ -74,13 +61,12 @@ class SparringNewsCard extends StatelessWidget {
           ),
         ],
       ),
-      width: 360,
+      width: 340,
       padding: const EdgeInsets.all(12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-
           Column(
             children: [
               DottedBorder(
@@ -116,19 +102,15 @@ class SparringNewsCard extends StatelessWidget {
                     _buildScoreBoard(
                       player1A,
                       player1B,
-                      set1List,
-                      set2List,
-                      set3List,
-                      1,
+                      skorPenantang,
+                      skorPenerima,
                       textPrimary,
                     ),
                     _buildScoreBoard(
                       player2A,
                       player2B,
-                      set1List,
-                      set2List,
-                      set3List,
-                      2,
+                      skorPenerima,
+                      skorPenantang,
                       textPrimary,
                     ),
                   ],
@@ -142,7 +124,9 @@ class SparringNewsCard extends StatelessWidget {
           Row(
             children: [
               _buildKategoriChip(
-                kategori.split(" ").isNotEmpty ? kategori.split(" ")[0] : kategori,
+                kategori.split(" ").isNotEmpty
+                    ? kategori.split(" ")[0]
+                    : kategori,
                 kategoriBg,
                 textPrimary,
               ),
@@ -176,32 +160,18 @@ class SparringNewsCard extends StatelessWidget {
         color: bgColor,
         borderRadius: BorderRadius.circular(4),
       ),
-      child: Text(
-        text,
-        style: TextStyle(fontSize: 13, color: textColor),
-      ),
+      child: Text(text, style: TextStyle(fontSize: 13, color: textColor)),
     );
   }
 
   Widget _buildScoreBoard(
     String player1,
     String? player2,
-    List<int>? set1List,
-    List<int>? set2List,
-    List<int>? set3List,
-    int tim,
+    List<int> teamScore,
+    List<int> opponentScore,
     Color textColor,
   ) {
     final bool ganda = player2 != null;
-    final int teamIndex = tim - 1;
-
-    final List<int?> teamScore = [
-      set1List != null && set1List.length > teamIndex ? set1List[teamIndex] : null,
-      set2List != null && set2List.length > teamIndex ? set2List[teamIndex] : null,
-      set3List != null && set3List.length > teamIndex ? set3List[teamIndex] : null,
-    ];
-
-    final List<List<int>?> scoreLists = [set1List, set2List, set3List];
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -215,15 +185,25 @@ class SparringNewsCard extends StatelessWidget {
                       children: [
                         Positioned(
                           left: 14,
-                          child: ProfilePicture(name: player1, radius: 12, fontsize: 12, count: 1),
+                          child: ProfilePicture(
+                            name: player1,
+                            radius: 12,
+                            fontsize: 12,
+                            count: 1,
+                          ),
                         ),
-                        ProfilePicture(name: player2, radius: 12, fontsize: 12, count: 1),
+                        ProfilePicture(
+                          name: player2,
+                          radius: 12,
+                          fontsize: 12,
+                          count: 1,
+                        ),
                       ],
                     ),
                   ),
                   const SizedBox(width: 8),
                   SizedBox(
-                    width: 190,
+                    width: 180,
                     height: 40,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -231,7 +211,10 @@ class SparringNewsCard extends StatelessWidget {
                         Expanded(
                           child: Text(
                             player1,
-                            style: TextStyle(fontWeight: FontWeight.w500, color: textColor),
+                            style: TextStyle(
+                              fontWeight: FontWeight.w500,
+                              color: textColor,
+                            ),
                             overflow: TextOverflow.ellipsis,
                             maxLines: 1,
                           ),
@@ -239,7 +222,10 @@ class SparringNewsCard extends StatelessWidget {
                         Expanded(
                           child: Text(
                             player2,
-                            style: TextStyle(fontWeight: FontWeight.w500, color: textColor),
+                            style: TextStyle(
+                              fontWeight: FontWeight.w500,
+                              color: textColor,
+                            ),
                             overflow: TextOverflow.ellipsis,
                             maxLines: 1,
                           ),
@@ -251,13 +237,21 @@ class SparringNewsCard extends StatelessWidget {
               )
             : Row(
                 children: [
-                  ProfilePicture(name: player1, radius: 12, fontsize: 12, count: 1),
+                  ProfilePicture(
+                    name: player1,
+                    radius: 12,
+                    fontsize: 12,
+                    count: 1,
+                  ),
                   const SizedBox(width: 8),
                   SizedBox(
                     width: 190,
                     child: Text(
                       player1,
-                      style: TextStyle(fontWeight: FontWeight.w500, color: textColor),
+                      style: TextStyle(
+                        fontWeight: FontWeight.w500,
+                        color: textColor,
+                      ),
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1,
                     ),
@@ -266,26 +260,24 @@ class SparringNewsCard extends StatelessWidget {
               ),
 
         Row(
+          spacing: 18,
           children: [
-            for (int index = 0; index < teamScore.length; index++)
-              if (teamScore[index] != null) ...[
-                if (index > 0) const SizedBox(width: 18),
-                Text(
-                  "${teamScore[index]}",
-                  style: TextStyle(
-                    fontWeight: _isSetWinner(scoreLists[index]!, teamIndex) ? FontWeight.bold : FontWeight.normal,
-                    color: textColor,
-                  ),
+            for (int index = 0; index < teamScore.length; index++) ...[
+              Text(
+                "${teamScore[index]}",
+                style: TextStyle(
+                  fontWeight:
+                      teamScore[index] ==
+                          max(teamScore[index], opponentScore[index])
+                      ? FontWeight.bold
+                      : FontWeight.normal,
+                  color: textColor,
                 ),
-              ],
+              ),
+            ],
           ],
         ),
       ],
     );
-  }
-
-  bool _isSetWinner(List<int> setScore, int teamIndex) {
-    final opponentIndex = teamIndex == 0 ? 1 : 0;
-    return setScore[teamIndex] > setScore[opponentIndex];
   }
 }

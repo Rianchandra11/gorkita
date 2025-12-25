@@ -1,28 +1,62 @@
-import 'package:http/http.dart' as http;
-import 'package:uts_backend/helper/base_url.dart';
-import 'dart:convert';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:uts_backend/model/notification_model.dart';
 
 class NotificationRepository {
-  static Future<List<NotificationModel>> getAll() async {
-    final String pathName = "/notif";
-    try {
-      var response = await http.get(Uri.parse("${BaseUrl.url}$pathName"));
-      List<dynamic> result = jsonDecode(response.body)['data'];
-      await Future.delayed(Duration(seconds: 1));
-      return result.map((e) => NotificationModel.fromJson(e)).toList();
-    } catch (e) {
-      rethrow;
-    }
+  static Future<List<QueryDocumentSnapshot<NotificationModel>>> getAll(
+    int id,
+  ) async {
+    FirebaseFirestore db = FirebaseFirestore.instance;
+    final result = await db
+        .collection("notifications")
+        .withConverter(
+          fromFirestore: NotificationModel.fromFirestore,
+          toFirestore: (NotificationModel notification, options) =>
+              notification.toFirestore(),
+        )
+        .where("user_id", isEqualTo: id)
+        .get();
+    return result.docs;
   }
 
-  static Future<void> deleteById(int id) async {
-    final String pathName = "/notif/delete/$id";
-    try {
-      var response = await http.delete(Uri.parse("${BaseUrl.url}$pathName"));
-      print(response.body);
-    } catch (e) {
-      rethrow;
+  static Stream<int> getUnreadCount(int id) {
+    FirebaseFirestore db = FirebaseFirestore.instance;
+    final result = db
+        .collection("notifications")
+        .where("user_id", isEqualTo: id)
+        .where("isRead", isEqualTo: false)
+        .snapshots()
+        .map((snapshot) => snapshot.size);
+    return result;
+  }
+
+  static Future<void> deleteSelectedNotifications(List<String> ids) async {
+    final db = FirebaseFirestore.instance;
+    final batch = db.batch();
+
+    for (final id in ids) {
+      final docRef = db.collection('notifications').doc(id);
+      batch.delete(docRef);
+    }
+
+    await batch.commit();
+  }
+
+  static Future<void> updateUnreadNotification() async {
+    final db = FirebaseFirestore.instance;
+
+    final querySnapshot = await db
+        .collection("notifications")
+        .where("isRead", isEqualTo: false)
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      final batch = db.batch();
+
+      for (final doc in querySnapshot.docs) {
+        batch.update(doc.reference, {"isRead": true});
+      }
+
+      await batch.commit();
     }
   }
 }

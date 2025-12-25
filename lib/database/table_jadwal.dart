@@ -1,14 +1,13 @@
 import 'package:uts_backend/database/database_service.dart';
-import 'package:uts_backend/model/jadwal_model.dart';
+import 'package:uts_backend/model/sql_model/jadwal_model.dart';
 
 class TableJadwal {
   ApiService dbService = ApiService();
- 
 
   Future<List<JadwalModel>> getAll() async {
     try {
       final result = await dbService.getAllJadwal();
-      
+
       if (result['success'] == true) {
         final List<dynamic> data = result['data'];
         return data.map((e) => JadwalModel.fromJson(e)).toList();
@@ -19,6 +18,4 @@ class TableJadwal {
       throw Exception('Error fetching jadwal: $e');
     }
   }
-
-
 }
