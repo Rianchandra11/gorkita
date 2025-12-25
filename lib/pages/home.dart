@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:uts_backend/database/database_service.dart';
 import 'package:uts_backend/helper/homecachemanager.dart';
+import 'package:uts_backend/model/venue_model.dart';
 import 'package:uts_backend/pages/notification_screen.dart';
 import 'package:uts_backend/pages/profil.dart';
 import 'package:uts_backend/pages/venue_list_screen.dart';
+import 'package:uts_backend/pages/venue_location_screen.dart';
 import 'package:uts_backend/widgets/mabar_card.dart';
 import 'package:uts_backend/widgets/quick_menu_item.dart';
 import 'package:uts_backend/widgets/sparring_news_card.dart';
@@ -14,8 +17,10 @@ import 'package:uts_backend/widgets/skeletons/venue_card_skeleton.dart';
 import 'package:uts_backend/widgets/sparring_card.dart';
 import 'package:uts_backend/widgets/venue_card.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-import 'package:provider/provider.dart';  // Tambah buat Provider
-import 'package:uts_backend/database/providers/theme_provider.dart';  // Adjust path kalau beda
+import 'package:provider/provider.dart'; // Tambah buat Provider
+import 'package:uts_backend/database/providers/theme_provider.dart'; // Adjust path kalau beda
+import 'package:permission_handler/permission_handler.dart';
+import 'package:geolocator/geolocator.dart';
 
 class HomeScreen extends StatefulWidget {
   final int id;
@@ -34,9 +39,14 @@ class _HomeScreenState extends State<HomeScreen> {
   List<dynamic> _venues = [];
   List<dynamic> _sparrings = [];
   List<dynamic> _sparringNews = [];
+  List<dynamic> _venueLocation = [];
   bool _isLoadingVenues = true;
   bool _isLoadingSparrings = true;
   bool _isLoadingSparringNews = true;
+  bool locationGranted = false;
+  String apaaja = '';
+
+  List<dynamic> venuesLocation = [];
   final List<Map<String, dynamic>> _dummySparringNews = [
     {
       'tanggal': DateTime.now().subtract(const Duration(days: 1)).toString(),
@@ -68,19 +78,51 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
   }
 
+  Future<void> getGorLocation(double lat, double lon) async {
+    List<Placemark> placemarks = await placemarkFromCoordinates(lat, lon);
+    Placemark place = placemarks[0];
+    String namaKota = place.subAdministrativeArea!
+        .split(' ')
+        .getRange(1, place.subAdministrativeArea!.split(' ').length)
+        .join(' ');
+
+    setState(() {
+      locationGranted = true;
+      _venueLocation = _venues.where((e) => e['kota'] == namaKota).toList();
+      
+      apaaja = namaKota;
+    });
+  }
+
+  getLocationUser() async {
+    var status = await Permission.location.status;
+    if (status.isDenied) {
+      Permission.location.request();
+    } else if (status.isGranted) {
+      var loc = await Geolocator.getCurrentPosition();
+
+      getGorLocation(loc.latitude, loc.longitude);
+    } else if (status.isPermanentlyDenied) {
+      openAppSettings();
+    }
+  }
+
   Future<void> _loadHomeData() async {
     await getNotifData();
     await getVenuesData();
     await getSparringsData();
     await getSparringNewsData();
-    
+
     print(' Home data loaded successfully!');
   }
 
   getNotifData() async {
     try {
       final result = await _apiService.getNotifications();
-      notif = result['success'] == true && result['data'] != null && result['data'].isNotEmpty;
+      notif =
+          result['success'] == true &&
+          result['data'] != null &&
+          result['data'].isNotEmpty;
       setState(() {});
     } catch (e) {
       print('Error getting notifications: $e');
@@ -102,7 +144,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   getSparringsData() async {
     try {
-      final sparrings = await SimpleCacheManager.getSparringsWithCache(_apiService);
+      final sparrings = await SimpleCacheManager.getSparringsWithCache(
+        _apiService,
+      );
       setState(() {
         _sparrings = sparrings;
         _isLoadingSparrings = false;
@@ -115,8 +159,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   getSparringNewsData() async {
     try {
-      final news = await SimpleCacheManager.getSparringNewsWithCache(_apiService);
-      
+      final news = await SimpleCacheManager.getSparringNewsWithCache(
+        _apiService,
+      );
+
       if (news.isEmpty) {
         useDummySparringNews();
       } else {
@@ -139,20 +185,20 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _onRefresh() async {
     if (_isRefreshing) return;
-    
+
     print('🎯 _onRefresh DIPANGGIL!');
-    
+
     setState(() {
       _isRefreshing = true;
       _isLoadingSparrings = true;
       _isLoadingSparringNews = true;
     });
-    
+
     try {
       await Future.delayed(Duration(milliseconds: 800));
-      
+
       final results = await SimpleCacheManager.forceRefreshAllData(_apiService);
-      
+
       if (results['success'] == true) {
         setState(() {
           _venues = results['venues'] ?? [];
@@ -163,11 +209,11 @@ class _HomeScreenState extends State<HomeScreen> {
           _isLoadingSparringNews = false;
           _isRefreshing = false;
         });
-        
+
         if (_sparringNews.isEmpty) {
           useDummySparringNews();
         }
-        
+
         print(' Pull to refresh completed successfully!');
         _showRefreshSuccess();
       } else {
@@ -179,7 +225,6 @@ class _HomeScreenState extends State<HomeScreen> {
         });
         _showRefreshError();
       }
-      
     } catch (e) {
       print(' Pull to refresh error: $e');
       setState(() {
@@ -199,7 +244,10 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             Icon(Icons.check_circle, color: Colors.white, size: 20),
             SizedBox(width: 8),
-            Text('Data berhasil diperbarui', style: TextStyle(color: Colors.white)),
+            Text(
+              'Data berhasil diperbarui',
+              style: TextStyle(color: Colors.white),
+            ),
           ],
         ),
         backgroundColor: Color.fromRGBO(21, 116, 42, 1),
@@ -218,7 +266,10 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             Icon(Icons.error_outline, color: Colors.white, size: 20),
             SizedBox(width: 8),
-            Text('Gagal memperbarui data', style: TextStyle(color: Colors.white)),
+            Text(
+              'Gagal memperbarui data',
+              style: TextStyle(color: Colors.white),
+            ),
           ],
         ),
         backgroundColor: Colors.red,
@@ -247,15 +298,18 @@ class _HomeScreenState extends State<HomeScreen> {
                   backgroundColor: isDark ? Colors.grey[850] : Colors.white,
                   displacement: 40,
                   strokeWidth: 2.5,
-                  child: _isRefreshing 
-                      ? _buildFullSkeleton(isDark) 
-                      : _buildHomeContent(isDark), 
+                  child: _isRefreshing
+                      ? _buildFullSkeleton(isDark)
+                      : _buildHomeContent(isDark),
                 ),
           bottomNavigationBar: BottomNavigationBar(
             backgroundColor: isDark ? Colors.grey[900] : Colors.white,
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-              BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profil'),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.person),
+                label: 'Profil',
+              ),
             ],
             currentIndex: currentPage,
             selectedItemColor: Colors.amber[800],
@@ -300,7 +354,8 @@ class _HomeScreenState extends State<HomeScreen> {
                               bool result = await Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => const NotificationScreen(),
+                                  builder: (context) =>
+                                      const NotificationScreen(),
                                 ),
                               );
                               if (result) {
@@ -325,7 +380,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                           height: 10,
                                           decoration: BoxDecoration(
                                             color: Colors.red,
-                                            borderRadius: BorderRadius.circular(5),
+                                            borderRadius: BorderRadius.circular(
+                                              5,
+                                            ),
                                           ),
                                         ),
                                       )
@@ -387,7 +444,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ),
 
-                        Schedule(isDark: isDark),  // Pass isDark ke Schedule
+                        Schedule(isDark: isDark), // Pass isDark ke Schedule
 
                         Card(
                           color: isDark ? Colors.grey[850] : Colors.white,
@@ -397,7 +454,8 @@ class _HomeScreenState extends State<HomeScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceAround,
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     QuickMenuItem(
@@ -406,7 +464,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                       onTap: () {
                                         Navigator.of(context).push(
                                           MaterialPageRoute(
-                                            builder: (context) => const VenueListScreen(),
+                                            builder: (context) =>
+                                                const VenueListScreen(),
                                           ),
                                         );
                                       },
@@ -438,7 +497,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
               const SizedBox(height: 18),
-              MabarCard(isDark: isDark),  // Pass isDark ke MabarCard
+              MabarCard(isDark: isDark), // Pass isDark ke MabarCard
+              const SizedBox(height: 18),
+              _venueLocation.isNotEmpty
+                  ? _buildVenueDisplayLocation(isDark)
+                  : _venueLocation.isEmpty && locationGranted
+                  ? _buildVenueLocationEmpty(isDark)
+                  : _buildVenuePermissionLocation(isDark),
               const SizedBox(height: 18),
               _isLoadingVenues
                   ? _buildVenueSkeleton(isDark)
@@ -551,7 +616,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                 ),
-                Schedule(isDark: isDark),  // Pass ke Schedule skeleton kalau ada
+                Schedule(isDark: isDark), // Pass ke Schedule skeleton kalau ada
                 Card(
                   color: isDark ? Colors.grey[850] : Colors.white,
                   child: Padding(
@@ -562,14 +627,17 @@ class _HomeScreenState extends State<HomeScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          children: List.generate(4, (index) => 
-                            Column(
+                          children: List.generate(
+                            4,
+                            (index) => Column(
                               children: [
                                 Container(
                                   width: 40,
                                   height: 40,
                                   decoration: BoxDecoration(
-                                    color: isDark ? Colors.grey[700] : Colors.grey[300],
+                                    color: isDark
+                                        ? Colors.grey[700]
+                                        : Colors.grey[300],
                                     shape: BoxShape.circle,
                                   ),
                                 ),
@@ -578,7 +646,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                   width: 60,
                                   height: 12,
                                   decoration: BoxDecoration(
-                                    color: isDark ? Colors.grey[700] : Colors.grey[300],
+                                    color: isDark
+                                        ? Colors.grey[700]
+                                        : Colors.grey[300],
                                     borderRadius: BorderRadius.circular(4),
                                   ),
                                 ),
@@ -629,6 +699,49 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildVenueLocationEmpty(bool isDark) {
+    return Column(
+      children: [
+        Center(child: Icon(Icons.location_off)),
+        SizedBox(
+          width: 200,
+          height: 50,
+          child: Text(
+            'Maaf, Tidak ada gor terdekat di kota kamu : ${apaaja}',
+            style: TextStyle(color: isDark ? Colors.white : Colors.black87),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildVenuePermissionLocation(bool isDark) {
+    return Column(
+      children: [
+        Center(child: Icon(Icons.location_off)),
+        SizedBox(
+          width: 200,
+          height: 50,
+          child: Text(
+            'Butuh akses lokasi untuk mencari venue terdekat di kota kamu !',
+            style: TextStyle(color: isDark ? Colors.white : Colors.black87),
+          ),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            getLocationUser();
+          },
+          child: Text('Aktifkan'),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: isDark ? Colors.grey[850] : Colors.white54,
+            foregroundColor: isDark ? Colors.white : Colors.black87,
+            shadowColor: isDark ? Colors.black26 : Colors.white,
+          ),
+        ),
+      ],
     );
   }
 
@@ -718,13 +831,77 @@ class _HomeScreenState extends State<HomeScreen> {
                 url: venue['url'] ?? '',
                 nama: venue['nama_venue'] ?? '',
                 kota: venue['kota'] ?? '',
-                harga: int.tryParse(venue['harga_perjam']?.toString() ?? '0') ?? 0,
+                harga:
+                    int.tryParse(venue['harga_perjam']?.toString() ?? '0') ?? 0,
                 jumlahrating: venue['total_rating'] ?? 0,
                 rating: (venue['rating'] ?? 0.0).toDouble(),
-                isDark: isDark,  // Pass ke VenueCard
+                isDark: isDark, // Pass ke VenueCard
               );
             },
             itemCount: _venues.length,
+            scrollDirection: Axis.horizontal,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildVenueDisplayLocation(bool isDark) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 12),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                "Venue untukmu di ${apaaja}",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: isDark ? Colors.white : Colors.black87,
+                ),
+              ),
+              IconButton(
+                onPressed: () {
+                  List<VenueModel> loc = _venueLocation
+                      .map((e) => VenueModel.fromJson(e))
+                      .toList();
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => VenueLocationScreen(venueLoc: loc),
+                    ),
+                  );
+                  print(loc);
+                },
+                icon: const Icon(
+                  Icons.arrow_circle_right_sharp,
+                  color: Color.fromRGBO(21, 116, 42, 1),
+                ),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(
+          width: double.infinity,
+          height: 330,
+          child: ListView.builder(
+            itemBuilder: (context, index) {
+              final venue = _venueLocation[index];
+              return VenueCard(
+                id: venue['venue_id'] ?? 0,
+                url: venue['url'] ?? '',
+                nama: venue['nama_venue'] ?? '',
+                kota: venue['kota'] ?? '',
+                harga:
+                    int.tryParse(venue['harga_perjam']?.toString() ?? '0') ?? 0,
+                jumlahrating: venue['total_rating'] ?? 0,
+                rating: (venue['rating'] ?? 0.0).toDouble(),
+                isDark: isDark, // Pass ke VenueCard
+              );
+            },
+            itemCount: _venueLocation.length,
             scrollDirection: Axis.horizontal,
           ),
         ),
@@ -807,21 +984,31 @@ class _HomeScreenState extends State<HomeScreen> {
           child: ListView.builder(
             itemBuilder: (context, index) {
               final sparring = _sparrings[index];
-              final searchPlayer = (sparring['search_player'] ?? '').split(", ");
-              final String player1 = searchPlayer.isNotEmpty ? searchPlayer[0] : '';
-              final String? player2 = searchPlayer.length > 1 ? searchPlayer[1] : null;
-              
+              final searchPlayer = (sparring['search_player'] ?? '').split(
+                ", ",
+              );
+              final String player1 = searchPlayer.isNotEmpty
+                  ? searchPlayer[0]
+                  : '';
+              final String? player2 = searchPlayer.length > 1
+                  ? searchPlayer[1]
+                  : null;
+
               return SparringCard(
                 player1: player1,
                 player2: player2,
                 namaTim: sparring['nama_tim'] ?? '',
-                tanggal: DateTime.parse(sparring['tanggal'] ?? DateTime.now().toString()),
-                minimumAvailableTime: (sparring['minimum_available_time'] ?? '').substring(0, 5),
-                maximumAvailableTime: (sparring['maximum_available_time'] ?? '').substring(0, 5),
+                tanggal: DateTime.parse(
+                  sparring['tanggal'] ?? DateTime.now().toString(),
+                ),
+                minimumAvailableTime: (sparring['minimum_available_time'] ?? '')
+                    .substring(0, 5),
+                maximumAvailableTime: (sparring['maximum_available_time'] ?? '')
+                    .substring(0, 5),
                 provinsi: sparring['provinsi'] ?? '',
                 kota: sparring['kota'] ?? '',
                 kategori: sparring['kategori'] ?? '',
-                isDark: isDark,  // Pass ke SparringCard
+                isDark: isDark, // Pass ke SparringCard
               );
             },
             itemCount: _sparrings.length,
@@ -906,9 +1093,11 @@ class _HomeScreenState extends State<HomeScreen> {
               final news = _sparringNews[index];
               final playerA = (news['player_a'] ?? '').split(", ");
               final playerB = (news['player_b'] ?? '').split(", ");
-              
+
               return SparringNewsCard(
-                tanggal: DateTime.parse(news['tanggal'] ?? DateTime.now().toString()),
+                tanggal: DateTime.parse(
+                  news['tanggal'] ?? DateTime.now().toString(),
+                ),
                 jam: (news['maximum_available_time'] ?? '').substring(0, 5),
                 kota: news['kota'] ?? '',
                 player1A: playerA.isNotEmpty ? playerA[0] : '',
@@ -919,7 +1108,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 skorSet2: news['skor_set2'],
                 skorSet3: news['skor_set3'],
                 kategori: news['kategori'] ?? '',
-                isDark: isDark,  // Pass ke SparringNewsCard
+                isDark: isDark, // Pass ke SparringNewsCard
               );
             },
             itemCount: _sparringNews.length,
@@ -950,9 +1139,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 Text(
                   "Update langsung dari lapangan!",
-                  style: TextStyle(
-                    color: Colors.grey,
-                  ),
+                  style: TextStyle(color: Colors.grey),
                 ),
               ],
             ),
