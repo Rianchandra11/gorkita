@@ -10,13 +10,13 @@ class UnreadNotificationProvider with ChangeNotifier {
     _isFirstOpen = false;
   }
 
-  void startScheduleNotification() {
+  void startScheduleNotification(int unreadCount) {
     AwesomeNotifications().createNotification(
       content: NotificationContent(
         id: 1,
         channelKey: 'unread_reminder_channel',
         actionType: ActionType.Default,
-        title: 'Anda memiliki 1 pesan yang belum dibaca',
+        title: 'Anda memiliki $unreadCount pesan yang belum dibaca',
         body: 'Ketuk untuk melihat pesan',
       ),
       schedule: NotificationCalendar.fromDate(
@@ -32,8 +32,8 @@ class UnreadNotificationProvider with ChangeNotifier {
     );
   }
 
-  void handlerOnAppStart() {
-    startScheduleNotification();
+  void handlerOnAppStart(int unreadCount) {
+    startScheduleNotification(unreadCount);
   }
 
   void stopScheduleNotification() async {

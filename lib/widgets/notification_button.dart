@@ -12,14 +12,14 @@ class NotificationButton extends StatefulWidget {
 }
 
 class _NotificationButtonState extends State<NotificationButton> {
-  late Stream<bool> _isAlertOnStream;
+  late Stream<int> _unreadCountStream;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
 
-    _isAlertOnStream = NotificationRepository.getUnreadCount(22);
+    _unreadCountStream = NotificationRepository.getUnreadCount(22);
   }
 
   @override
@@ -40,19 +40,19 @@ class _NotificationButtonState extends State<NotificationButton> {
           children: [
             const Icon(Icons.notifications_none, size: 26, color: Colors.white),
             StreamBuilder(
-              stream: _isAlertOnStream,
+              stream: _unreadCountStream,
               builder: (context, asyncSnapshot) {
                 if (asyncSnapshot.hasData) {
-                  bool isAlertOn = asyncSnapshot.data!;
+                  int unreadCount = asyncSnapshot.data!;
 
                   if (provider.isFirstOpen) {
                     provider.changeFirstOpenStatus();
-                    if (isAlertOn) {
-                      provider.handlerOnAppStart();
+                    if (unreadCount > 0) {
+                      provider.handlerOnAppStart(unreadCount);
                     }
                   }
 
-                  return isAlertOn
+                  return unreadCount > 0
                       ? Positioned(
                           top: 1,
                           right: 1,

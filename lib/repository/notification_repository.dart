@@ -18,14 +18,14 @@ class NotificationRepository {
     return result.docs;
   }
 
-  static Stream<bool> getUnreadCount(int id) {
+  static Stream<int> getUnreadCount(int id) {
     FirebaseFirestore db = FirebaseFirestore.instance;
     final result = db
         .collection("notifications")
         .where("user_id", isEqualTo: id)
         .where("isRead", isEqualTo: false)
         .snapshots()
-        .map((snapshot) => snapshot.size > 0 ? true : false);
+        .map((snapshot) => snapshot.size);
     return result;
   }
 
