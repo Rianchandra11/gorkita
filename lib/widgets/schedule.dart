@@ -1,22 +1,29 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:uts_backend/helper/date_formatter.dart';
 import 'package:uts_backend/model/booking_model.dart';
+import 'package:uts_backend/providers/booking_reminder_provider.dart';
 import 'package:uts_backend/repository/user_repository.dart';
 import 'package:uts_backend/widgets/skeletons/schedule_skeleton.dart';
 
 class Schedule extends StatefulWidget {
-  const Schedule({super.key, required this.isDark});
+  const Schedule({super.key, required this.isDark, required this.userId});
   final bool isDark;
+  final int userId;
 
   @override
   State<Schedule> createState() => _ScheduleState();
 }
 
 class _ScheduleState extends State<Schedule> {
+  bool _hasData = false;
+
   @override
   Widget build(BuildContext context) {
     final isDark = widget.isDark;
+
+    context.read<BookingReminderProvider>().handlerOnAppStart(widget.userId);
 
     return Column(
       children: [
@@ -29,7 +36,7 @@ class _ScheduleState extends State<Schedule> {
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: FutureBuilder(
-              future: UserRepository.getBookingSchedule(22),
+              future: UserRepository.getBookingSchedule(widget.userId),
               builder: (context, asyncSnapshot) {
                 if (asyncSnapshot.connectionState == ConnectionState.waiting) {
                   return Column(
@@ -57,6 +64,7 @@ class _ScheduleState extends State<Schedule> {
                     ],
                   );
                 }
+                _hasData = true;
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -85,7 +93,7 @@ class _ScheduleState extends State<Schedule> {
             color: isDark ? Colors.white : Colors.black,
           ),
         ),
-        if (!isLoading)
+        if (!isLoading && _hasData)
           TextButton(
             onPressed: () {},
             style: TextButton.styleFrom(
