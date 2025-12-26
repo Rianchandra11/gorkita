@@ -25,6 +25,7 @@ class BookingReminderProvider with ChangeNotifier {
       ),
       schedule: NotificationCalendar.fromDate(
         date: DateTime.now().add(Duration(seconds: 10)),
+        allowWhileIdle: true,
       ),
       actionButtons: [
         NotificationActionButton(key: "FIND_SCHEDULE", label: "Lihat jadwal"),
