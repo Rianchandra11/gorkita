@@ -44,7 +44,14 @@ class NotificationController {
                 route.isFirst,
           );
         }
-
+        break;
+      case "booking_reminder_channel":
+        if (receivedAction.buttonKeyPressed == "FIND_SCHEDULE") {
+          MyApp.navigatorKey.currentState?.pushNamedAndRemoveUntil(
+            '/',
+            (route) => (route.settings.name != '/') || route.isFirst,
+          );
+        }
         break;
       default:
         throw StateError('Unhandled Channel key: ${receivedAction.channelKey}');

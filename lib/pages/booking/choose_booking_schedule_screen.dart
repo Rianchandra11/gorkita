@@ -8,12 +8,14 @@ import 'package:table_sticky_headers/table_sticky_headers.dart';
 import 'package:uts_backend/model/booking_model.dart';
 import 'package:uts_backend/pages/home.dart';
 import 'package:uts_backend/repository/venue_repository.dart';
+import 'package:uts_backend/services/booking_service.dart';
 
 class ChooseBookingScheduleScreen extends StatefulWidget {
   final int venueId;
   final String jamOperasional;
   final String harga;
   final int jumlahLapangan;
+  final String namaVenue;
 
   const ChooseBookingScheduleScreen({
     super.key,
@@ -21,6 +23,7 @@ class ChooseBookingScheduleScreen extends StatefulWidget {
     required this.jamOperasional,
     required this.harga,
     required this.jumlahLapangan,
+    required this.namaVenue,
   });
 
   @override
@@ -41,6 +44,7 @@ class _ChooseBookingScheduleScreenState
   List selectedSchedule = [];
   late Stream<QuerySnapshot<BookingModel>> bookedScheduleStream;
   bool _isLoading = false;
+  bool _isCompleted = false;
   InterstitialAd? _interstitialAd;
 
   void getDateList() {
@@ -102,10 +106,10 @@ class _ChooseBookingScheduleScreenState
   }
 
   void _loadInterstitialAd() {
-    String _adUnitId = "ca-app-pub-3940256099942544/1033173712";
+    String adUnitId = "ca-app-pub-3940256099942544/1033173712";
 
     InterstitialAd.load(
-      adUnitId: _adUnitId,
+      adUnitId: adUnitId,
       request: const AdRequest(),
       adLoadCallback: InterstitialAdLoadCallback(
         onAdLoaded: (InterstitialAd ad) {
@@ -357,10 +361,16 @@ class _ChooseBookingScheduleScreenState
               child: Stack(
                 children: [
                   IconButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    icon: Icon(Icons.chevron_left_rounded, size: 28),
+                    onPressed: !_isCompleted
+                        ? () {
+                            Navigator.pop(context);
+                          }
+                        : null,
+                    icon: Icon(
+                      Icons.chevron_left_rounded,
+                      size: 28,
+                      color: !_isCompleted ? Colors.black : Colors.grey[200],
+                    ),
                   ),
                   Center(
                     child: Text(
@@ -469,6 +479,18 @@ class _ChooseBookingScheduleScreenState
   }
 
   Widget _buildBookingBar(BuildContext context) {
+    void showSnackBar() {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            "Mengalihkan ke Home…",
+            style: TextStyle(color: Colors.white, fontSize: 14),
+          ),
+          backgroundColor: Colors.black,
+        ),
+      );
+    }
+
     return Container(
       height: 130,
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
@@ -531,33 +553,21 @@ class _ChooseBookingScheduleScreenState
                       : () async {
                           setState(() => _isLoading = true);
 
-                          for (final e in selectedSchedule) {
-                            final parts = e.split(" - ");
-                            final lapangan = parts[0];
-                            final hour = int.parse(parts[1]);
-
-                            final jamMulai = DateTime(
-                              selectedDate.year,
-                              selectedDate.month,
-                              selectedDate.day,
-                              hour,
-                            );
-
-                            await VenueRepository.insertBooking(
-                              widget.venueId,
-                              22,
-                              "Alvin",
-                              lapangan,
-                              jamMulai,
-                            );
-                          }
+                          await BookingService.insert(
+                            selectedSchedule,
+                            selectedDate,
+                            widget.venueId,
+                            widget.namaVenue,
+                          );
 
                           setState(() {
                             _isLoading = false;
                             selectedSchedule.clear();
+                            showSnackBar();
+                            _isCompleted = true;
                           });
 
-                          await Future.delayed(Duration(seconds: 2));
+                          await Future.delayed(Duration(seconds: 5));
 
                           _interstitialAd?.show();
                         },

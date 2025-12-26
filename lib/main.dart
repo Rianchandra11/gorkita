@@ -6,6 +6,7 @@ import 'package:uts_backend/database/firebase_option.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:uts_backend/controllers/notification_controller.dart';
+import 'package:uts_backend/providers/booking_reminder_provider.dart';
 import 'package:uts_backend/providers/unread_notification_provider.dart';
 import 'package:uts_backend/insert_dummy.dart';
 import 'package:uts_backend/pages/booking/choose_booking_schedule_screen.dart';
@@ -30,6 +31,23 @@ Future<void> main() async {
       channelName: 'Pengingat Pesan Belum Dibaca',
       channelDescription:
           'Notifikasi pengingat jika masih ada pesan yang belum dibaca',
+      importance: NotificationImportance.High,
+      defaultColor: Colors.blue,
+      ledColor: Colors.white,
+    ),
+    NotificationChannel(
+      channelKey: 'booking_confirmation_channel',
+      channelName: 'Pengingat Konfirmasi Booking Berhasil',
+      channelDescription:
+          'Notifikasi konfirmasi jika data booking user berhasil diinput',
+      importance: NotificationImportance.High,
+      defaultColor: Colors.blue,
+      ledColor: Colors.white,
+    ),
+    NotificationChannel(
+      channelKey: 'booking_reminder_channel',
+      channelName: 'Pengingat Waktu Booking',
+      channelDescription: 'Notifikasi pengingat jika mendekati waktu booking',
       importance: NotificationImportance.High,
       defaultColor: Colors.blue,
       ledColor: Colors.white,
@@ -70,6 +88,7 @@ Future<void> main() async {
           ChangeNotifierProvider<AuthProvider>.value(value: authProvider),
           ChangeNotifierProvider<ThemeProvider>(create: (_) => ThemeProvider()),
           ChangeNotifierProvider(create: (_) => UnreadNotificationProvider()),
+          ChangeNotifierProvider(create: (_) => BookingReminderProvider()),
         ],
         child: MyApp(analytics: analytics),
       ),

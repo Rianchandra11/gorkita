@@ -155,7 +155,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                           ),
 
-                          Schedule(isDark: isDark),
+                          Schedule(isDark: isDark, userId: 22),
 
                           Card(
                             color: isDark ? Colors.grey[850] : Colors.white,
