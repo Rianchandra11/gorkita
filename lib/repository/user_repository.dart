@@ -25,10 +25,9 @@ class UserRepository {
 
     final List<BookingModel> result = [];
 
-    /// Inject namaVenue
     for (var doc in bookingSnap.docs) {
       final booking = doc.data();
-      booking.namaVenue = venueMap[booking.venueId];
+      booking.venue?.nama ??= venueMap[booking.venue?.venueId];
       result.add(booking);
     }
 

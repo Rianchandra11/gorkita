@@ -111,7 +111,7 @@ class _ScheduleState extends State<Schedule> {
   Container _buildScheduleCard(BookingModel data, bool isDark) {
     String tanggal = DateFormatter.format("dd", data.jamMulai!);
     String hari = DateFormatter.format("EEEE", data.jamMulai!);
-    String nama = data.namaVenue!;
+    String nama = data.venue!.nama!;
     String waktuMulai = DateFormatter.format("HH:mm", data.jamMulai!);
     String waktuSelesai = DateFormatter.format(
       "HH:mm",

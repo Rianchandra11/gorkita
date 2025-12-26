@@ -275,6 +275,7 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                     jamOperasional: data!.jamOperasional!,
                     harga: "${data!.harga!}",
                     jumlahLapangan: data!.jumlahLapangan!,
+                    namaVenue: data!.nama!,
                   ),
                 ),
               );

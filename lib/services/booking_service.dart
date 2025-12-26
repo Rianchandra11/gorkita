@@ -1,19 +1,15 @@
 import 'package:awesome_notifications/awesome_notifications.dart';
-import 'package:uts_backend/helper/date_formatter.dart';
-import 'package:uts_backend/model/venue_model.dart';
 import 'package:uts_backend/model/notification_model.dart' as nm;
 import 'package:uts_backend/repository/notification_repository.dart';
 import 'package:uts_backend/repository/venue_repository.dart';
 
 class BookingService {
   static Future<void> createConfirmationNotification(
-    int venueId,
+    String namaVenue,
     int jumlahBooking,
     DateTime tanggal,
   ) async {
     try {
-      VenueModel venue = await VenueRepository.getDetails(venueId);
-      String namaVenue = venue.nama!;
       String notifBody = 'Berhasil booking $jumlahBooking jadwal di $namaVenue';
 
       await NotificationRepository.addNotification(
@@ -42,10 +38,11 @@ class BookingService {
     }
   }
 
-  static Future<void> insertBookings(
+  static Future<void> insert(
     List selectedSchedule,
     DateTime selectedDate,
     int venueId,
+    String namaVenue,
   ) async {
     try {
       for (final e in selectedSchedule) {
@@ -62,6 +59,7 @@ class BookingService {
 
         await VenueRepository.insertBooking(
           venueId,
+          namaVenue,
           22,
           "Alvin",
           lapangan,
@@ -70,7 +68,7 @@ class BookingService {
       }
 
       await createConfirmationNotification(
-        venueId,
+        namaVenue,
         selectedSchedule.length,
         selectedDate,
       );

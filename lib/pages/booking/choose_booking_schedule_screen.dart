@@ -15,6 +15,7 @@ class ChooseBookingScheduleScreen extends StatefulWidget {
   final String jamOperasional;
   final String harga;
   final int jumlahLapangan;
+  final String namaVenue;
 
   const ChooseBookingScheduleScreen({
     super.key,
@@ -22,6 +23,7 @@ class ChooseBookingScheduleScreen extends StatefulWidget {
     required this.jamOperasional,
     required this.harga,
     required this.jumlahLapangan,
+    required this.namaVenue,
   });
 
   @override
@@ -551,10 +553,11 @@ class _ChooseBookingScheduleScreenState
                       : () async {
                           setState(() => _isLoading = true);
 
-                          await BookingService.insertBookings(
+                          await BookingService.insert(
                             selectedSchedule,
                             selectedDate,
                             widget.venueId,
+                            widget.namaVenue,
                           );
 
                           setState(() {
