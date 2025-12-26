@@ -58,7 +58,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: Colors.white,
         title: Text(
           selectMode ? "${selectedId.length}" : "Notifikasi",
           style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
@@ -67,6 +67,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
         shape: const Border(
           bottom: BorderSide(width: 2, color: Colors.black12),
         ),
+        scrolledUnderElevation: 0,
+        surfaceTintColor: Colors.transparent,
 
         leading: IconButton(
           icon: Icon(
@@ -92,7 +94,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                     await NotificationRepository.deleteSelectedNotifications(
                       selectedId,
                     );
-                    _notifFuture = NotificationRepository.getAll(1);
+                    _notifFuture = NotificationRepository.getAll(22);
                     setState(() {
                       selectMode = false;
                       selectedId = [];
@@ -114,59 +116,58 @@ class _NotificationScreenState extends State<NotificationScreen> {
             return Center(child: Text("Belum ada pesan"));
           } else {
             updateUnreadNotification(asyncSnapshot.data!, provider);
-            return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              child: ListView.builder(
-                itemCount: asyncSnapshot.data!.length,
-                itemBuilder: (context, index) {
-                  final data = asyncSnapshot.data![index].data();
-                  final String pesan = data.body!;
-                  final DateTime tanggal = data.createdAt!;
-                  final String id = asyncSnapshot.data![index].id;
+            return ListView.builder(
+              itemCount: asyncSnapshot.data!.length,
+              itemBuilder: (context, index) {
+                final data = asyncSnapshot.data![index].data();
+                final String pesan = data.body!;
+                final DateTime tanggal = data.createdAt!;
+                final String id = asyncSnapshot.data![index].id;
+                final bool isSelected = selectedId.contains(id);
 
-                  return ListTile(
-                    tileColor: selectMode ? Colors.grey[300] : Colors.white,
-                    leading: const CircleAvatar(
-                      radius: 24,
-                      backgroundColor: Color.fromRGBO(21, 116, 42, 1),
-                      foregroundColor: Colors.white,
-                      child: Icon(Icons.headset_mic),
+                return ListTile(
+                  tileColor: isSelected ? Colors.grey[300] : Colors.white,
+                  leading: const CircleAvatar(
+                    radius: 24,
+                    backgroundColor: Color.fromRGBO(21, 116, 42, 1),
+                    foregroundColor: Colors.white,
+                    child: Icon(Icons.headset_mic),
+                  ),
+                  title: Text(
+                    pesan,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
+                  ),
+                  subtitle: Text(
+                    getTimeAgo(tanggal),
+                    style: const TextStyle(
+                      color: Color.fromRGBO(76, 76, 76, 1),
+                      fontSize: 14,
                     ),
-                    title: Text(
-                      pesan,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w500,
-                        fontSize: 14,
-                      ),
-                    ),
-                    subtitle: Text(
-                      getTimeAgo(tanggal),
-                      style: const TextStyle(
-                        color: Color.fromRGBO(76, 76, 76, 1),
-                        fontSize: 14,
-                      ),
-                    ),
-                    onLongPress: () {
+                  ),
+                  onLongPress: () {
+                    setState(() {
+                      selectMode = true;
+                      selectedId.add(id);
+                    });
+                  },
+                  onTap: () {
+                    if (selectMode) {
                       setState(() {
-                        selectMode = true;
-                        selectedId.add(id);
-                      });
-                    },
-                    onTap: () {
-                      if (selectMode) {
-                        setState(() {
+                        if (isSelected) {
                           selectedId.remove(id);
                           if (selectedId.isEmpty) {
                             selectMode = false;
                           }
-                        });
-                      }
-                    },
-                  );
-                },
-              ),
+                        } else {
+                          selectedId.add(id);
+                        }
+                      });
+                    }
+                  },
+                );
+              },
             );
           }
         },
