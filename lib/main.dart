@@ -1,10 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:uts_backend/database/firebase_option.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:uts_backend/pages/splash.dart';
-import 'package:uts_backend/database/providers/provider.dart';
-import 'package:uts_backend/database/providers/theme_provider.dart';
+import 'package:uts_backend/providers/provider.dart';
+import 'package:uts_backend/providers/theme_provider.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 
@@ -15,16 +16,16 @@ Future<void> main() async {
   try {
     try {
       Firebase.app();
-      print('Firebase app already exists, skipping initialization');
+      if (kDebugMode) debugPrint('Firebase app already exists, skipping initialization');
     } catch (e) {
-      print('Initializing Firebase...');
+      if (kDebugMode) debugPrint('Initializing Firebase...');
       await Firebase.initializeApp(
         options: DefaultFirebaseOptions.android,
       );
-      print('Firebase initialized successfully');
+      if (kDebugMode) debugPrint('Firebase initialized successfully');
     }
   } catch (e) {
-    print('Error with Firebase: $e');
+    if (kDebugMode) debugPrint('Error with Firebase: $e');
   }
 
   // Inisialisasi Analytics
@@ -32,15 +33,15 @@ Future<void> main() async {
 
   try {
     await initializeDateFormatting('id_ID', null);
-    print('Date formatting initialized');
+    if (kDebugMode) debugPrint('Date formatting initialized');
   } catch (e) {
-    print('Error initializing date formatting: $e');
-  }
+    if (kDebugMode) debugPrint('Error initializing date formatting: $e');
+  } 
 
   try {
     final authProvider = AuthProvider();
     await authProvider.initialize();
-    print('AuthProvider initialized');
+    if (kDebugMode) debugPrint('AuthProvider initialized');
 
     runApp(
       MultiProvider(
@@ -52,7 +53,7 @@ Future<void> main() async {
       ),
     );
   } catch (e) {
-    print('Error initializing AuthProvider: $e');
+    if (kDebugMode) debugPrint('Error initializing AuthProvider: $e');
     runApp(
       MultiProvider(
         providers: [

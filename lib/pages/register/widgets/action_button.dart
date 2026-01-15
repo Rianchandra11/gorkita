@@ -9,17 +9,20 @@ class ActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return controller.isLoading
-        ? const CircularProgressIndicator()
+        ? const SizedBox(
+            height: 48,
+            child: Center(child: CircularProgressIndicator(strokeWidth: 2.5)),
+          )
         : SizedBox(
             width: double.infinity,
-            height: 52,
+            height: 48,
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: controller.primary,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                elevation: 3,
+                elevation: 2,
               ),
               onPressed: controller.showVerificationField
                   ? () => controller.handleVerification(context)
@@ -28,7 +31,7 @@ class ActionButton extends StatelessWidget {
                 controller.showVerificationField ? "Verifikasi" : "Daftar",
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
-                  fontSize: 16,
+                  fontSize: 14,
                   color: Colors.white,
                 ),
               ),

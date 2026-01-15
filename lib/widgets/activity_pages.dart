@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:uts_backend/database/sqflite/database_sqf.dart';
 import 'package:uts_backend/model/cari_sparring_model.dart';
 import 'package:uts_backend/pages/form_carisparring.dart';
 
@@ -114,23 +113,17 @@ class SparringPage extends StatefulWidget {
 class _SparringPageState extends State<SparringPage> {
   List<CariSparringModel>? dataSpar;
   String test = '';
-  DatabaseSqf db = DatabaseSqf();
   int? userId;
   initPrefs() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
     userId = prefs.getInt('id');
-    final wel = await db.getSparringByIdUser(prefs.getInt('id')!);
-    if (wel.isNotEmpty) {
-      setState(() {
-        dataSpar = wel;
-      });
-    }
+    // Firebase-only: Remove local database calls
+    // Load data from Firestore instead if needed
   }
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     initPrefs();
   }
