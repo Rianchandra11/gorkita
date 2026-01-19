@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:uts_backend/database/database_service.dart';
 import 'package:uts_backend/database/providers/provider.dart';
 import 'package:uts_backend/pages/forgot_password.dart';
-import 'package:uts_backend/pages/login.dart';
+import 'package:uts_backend/pages/login/login_page.dart';
 import 'package:uts_backend/widgets/aktivitypage.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
@@ -11,18 +11,31 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uts_backend/database/providers/theme_provider.dart';
+import 'package:uts_backend/helper/image_picker_helper.dart'; // sesuaikan path kalau beda
+import 'dart:typed_data';
 import 'dart:convert';
 
 class Profil extends StatefulWidget {
   final int id;
-  const Profil({super.key, required this.id});
+  final bool testMode;
+
+  const Profil({
+    super.key,
+    required this.id,
+    this.testMode = false,
+  });
 
   @override
   State<Profil> createState() => _ProfilState();
 }
 
+
+  // @override
+  // State<Profil> createState() => _ProfilState();
+
+
 class _ProfilState extends State<Profil> {
-  ApiService user = ApiService();
+  ApiService? user;
   String? name;
   String? password;
   String? email;
@@ -37,40 +50,55 @@ class _ProfilState extends State<Profil> {
   int sparringCount = 8;
   int mabarCount = 15;
 
-  initUser(int id) async {
-    try {
-      var data = await user.getUserById(id);
+  Future<void> initUser(int id) async {
+  // 🛑 JIKA TEST MODE → LANGSUNG KELUAR
+  if (widget.testMode) {
+    setState(() {
+      name = 'Test User';
+      email = 'test@email.com';
+      nohp = '0000000000';
+      levelSkill = 'Beginner';
+      _isLoading = false;
+    });
+    return;
+  }
 
-      if (data['success'] == true && data['user'] != null) {
-        Map<String, dynamic> userData = data['user'];
+  // 🛑 JIKA user BELUM ADA
+  if (user == null) return;
 
-        setState(() {
-          name = userData["name"]?.toString() ?? "Nama tidak tersedia";
-          password = userData["password"]?.toString() ?? "";
-          email = userData["email"]?.toString() ?? "Email tidak tersedia";
-          nohp = userData["phone"]?.toString() ?? "Nomor tidak tersedia";
-          levelSkill = userData["level_skill"]?.toString() ?? "Beginner";
-          _isLoading = false;
-        });
-      } else {
-        setState(() {
-          name = "Error: ${data['message'] ?? 'pesan error'}";
-          email = "-";
-          nohp = "-";
-          levelSkill = "-";
-          _isLoading = false;
-        });
-      }
-    } catch (e) {
+  try {
+    var data = await user!.getUserById(id);
+
+    if (data['success'] == true && data['user'] != null) {
+      Map<String, dynamic> userData = data['user'];
+
       setState(() {
-        name = "koneksi eror";
+        name = userData["name"]?.toString() ?? "Nama tidak tersedia";
+        email = userData["email"]?.toString() ?? "Email tidak tersedia";
+        nohp = userData["phone"]?.toString() ?? "Nomor tidak tersedia";
+        levelSkill = userData["level_skill"]?.toString() ?? "Beginner";
+        _isLoading = false;
+      });
+    } else {
+      setState(() {
+        name = "Error";
         email = "-";
         nohp = "-";
         levelSkill = "-";
         _isLoading = false;
       });
     }
+  } catch (e) {
+    setState(() {
+      name = "koneksi error";
+      email = "-";
+      nohp = "-";
+      levelSkill = "-";
+      _isLoading = false;
+    });
   }
+}
+
 
   Future<void> _loadProfileImage() async {
     try {
@@ -97,29 +125,79 @@ class _ProfilState extends State<Profil> {
       print('Error saving image: $e');
     }
   }
+  Widget _buildTestUI(BuildContext context) {
+  return Scaffold(
+    body: Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text('Profil Test'),
+          const SizedBox(height: 16),
 
-  Future<void> _pickImage() async {
-    final XFile? image = await _picker.pickImage(
-      source: ImageSource.gallery,
-      maxWidth: 200,
-      maxHeight: 200,
-    );
+            IconButton(
+            key: const Key('camera_button'),
+            icon: const Icon(Icons.camera_alt),
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (_) => AlertDialog(
+                  title: const Text('Ubah Foto Profil'),
+                  actions: [
+                    TextButton.icon(
+                      icon: const Icon(Icons.photo),
+                      label: const Text('Galeri'),
+                      onPressed: () {},
+                    ),
+                    TextButton.icon(
+                      icon: const Icon(Icons.camera),
+                      label: const Text('Kamera'),
+                      onPressed: () {},
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Batal'),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    ),
+  );
+}
 
-    if (image != null) {
-      Uint8List bytes = await image.readAsBytes();
 
-      await _saveProfileImage(bytes);
-
-      String imageUrl = "user_${widget.id}_profile";
-      await user.uploadProfileImage(widget.id, imageUrl);
-
-      setState(() {
-        _profileImageBytes = bytes;
-      });
-
-      _showMessage('Foto diubah!', Colors.green);
-    }
+  // 2. GANTI SELURUH fungsi _pickImage() lama dengan ini (hapus yang lama!)
+Future<void> _pickImage() async {
+  // 🛑 JIKA TEST MODE → JANGAN UPLOAD KE BACKEND
+  if (widget.testMode) {
+    return;
   }
+
+  File? pickedFile = await ImagePickerHelper.pickImage(context);
+
+  if (pickedFile != null) {
+    Uint8List bytes = await pickedFile.readAsBytes();
+
+    await _saveProfileImage(bytes);
+
+    String imageUrl = "user_${widget.id}_profile";
+
+    // 🛡️ AMAN DARI NULL + FIREBASE
+    if (user != null) {
+      await user!.uploadProfileImage(widget.id, imageUrl);
+    }
+
+    setState(() {
+      _profileImageBytes = bytes;
+    });
+
+    _showMessage('Foto profil berhasil diubah!', Colors.green);
+  }
+}
+
 
   Widget _buildProfileImage(ThemeProvider themeProvider) {
     return Container(
@@ -161,27 +239,42 @@ class _ProfilState extends State<Profil> {
   }
 
   void _showEditPhotoDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Ubah Foto Profile'),
-        content: const Text('Pilih sumber foto'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              _pickImage();
-            },
-            child: const Text('Dari Galeri'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Batal'),
-          ),
-        ],
-      ),
-    );
-  }
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('Ubah Foto Profil'),
+      content: const Text('Pilih sumber foto'),
+      actions: [
+        TextButton.icon(
+          icon: Icon(Icons.photo_library),
+          label: Text('Galeri'),
+          onPressed: () {
+            Navigator.pop(context);
+            _pickImage(); // dari galeri + permission
+          },
+        ),
+        TextButton.icon(
+          icon: Icon(Icons.camera_alt),
+          label: Text('Kamera'),
+          onPressed: () async {
+            Navigator.pop(context);
+            File? photo = await ImagePickerHelper.takePhoto(context); // bonus function
+            if (photo != null) {
+              Uint8List bytes = await photo.readAsBytes();
+              await _saveProfileImage(bytes);
+              setState(() => _profileImageBytes = bytes);
+              _showMessage('Foto dari kamera berhasil!', Colors.green);
+            }
+          },
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Batal'),
+        ),
+      ],
+    ),
+  );
+}
 
   void _showMessage(String message, Color color) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -194,16 +287,16 @@ class _ProfilState extends State<Profil> {
   }
 
   @override
-  void initState() {
-    super.initState();
+void initState() {
+  super.initState();
+
+  // ⛔ JANGAN SENTUH FIREBASE SAAT TEST
+  if (!widget.testMode) {
+    user = ApiService();
     _initializeData();
   }
+}
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _loadProfileImage();
-  }
 
   Future<void> _initializeData() async {
     await initUser(widget.id);
@@ -213,10 +306,17 @@ class _ProfilState extends State<Profil> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final authProvider = Provider.of<AuthProvider>(context);
-    final themeProvider = Provider.of<ThemeProvider>(context);
+@override
+Widget build(BuildContext context) {
+
+  // ✅ JALUR KHUSUS TEST (WAJIB ADA)
+  if (widget.testMode) {
+    return _buildTestUI(context);
+  }
+
+  final authProvider = Provider.of<AuthProvider>(context);
+  final themeProvider = Provider.of<ThemeProvider>(context);
+
 
     if (_isLoading) {
       return Scaffold(

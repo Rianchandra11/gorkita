@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:uts_backend/database/database_service.dart';
-import 'package:uts_backend/pages/login.dart';
+import 'package:uts_backend/pages/login/login_page.dart';
 
 class ResetPasswordPage extends StatefulWidget {
   final String email;

@@ -21,12 +21,10 @@ class ActionButton extends StatelessWidget {
                 ),
                 elevation: 3,
               ),
-              onPressed: controller.showVerificationField
-                  ? () => controller.handleVerification(context)
-                  : () => controller.handleRegister(context),
-              child: Text(
-                controller.showVerificationField ? "Verifikasi" : "Daftar",
-                style: const TextStyle(
+              onPressed: () => controller.handleRegister(context),
+              child: const Text(
+                "Daftar",
+                style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
                   color: Colors.white,

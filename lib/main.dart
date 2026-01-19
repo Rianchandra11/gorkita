@@ -7,27 +7,36 @@ import 'package:uts_backend/database/providers/provider.dart';
 import 'package:uts_backend/database/providers/theme_provider.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
-
+import 'package:uts_backend/helper/notification_helper.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:uts_backend/widgets/ad_interstitial.dart'; 
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   try {
-    try {
-      Firebase.app();
-      print('Firebase app already exists, skipping initialization');
-    } catch (e) {
+    if (Firebase.apps.isEmpty) {
       print('Initializing Firebase...');
       await Firebase.initializeApp(
         options: DefaultFirebaseOptions.android,
       );
       print('Firebase initialized successfully');
+    } else {
+      print('Firebase app already exists');
     }
   } catch (e) {
     print('Error with Firebase: $e');
   }
 
-  // Inisialisasi Analytics
+  await NotificationHelper.init();
+  print('NotificationHelper initialized');
+
+  await MobileAds.instance.initialize();
+  print('Google Mobile Ads (AdMob) initialized');
+
+  InterstitialHelper.loadAd();
+  print('Interstitial Ad preloaded');
+
   final FirebaseAnalytics analytics = FirebaseAnalytics.instance;
 
   try {
@@ -70,7 +79,6 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Ambil provider tema
     final themeProvider = Provider.of<ThemeProvider>(context);
 
     return MaterialApp(

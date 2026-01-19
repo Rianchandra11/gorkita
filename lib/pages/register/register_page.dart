@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:uts_backend/pages/register/register_controller.dart';
 import 'package:uts_backend/pages/register/register_form.dart';
-import 'package:uts_backend/pages/register/verification_form.dart';
 import 'package:uts_backend/pages/register/widgets/action_button.dart';
 import 'package:uts_backend/pages/register/widgets/social_login.dart';
-
 import 'widgets/link_footer.dart';
-
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -27,7 +24,7 @@ class _RegisterPageState extends State<RegisterPage> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => _controller.handleBackPressed(context),
+          onPressed: () => Navigator.pop(context),
         ),
         centerTitle: false,
         title: const Text(
@@ -53,15 +50,11 @@ class _RegisterPageState extends State<RegisterPage> {
                   const SizedBox(height: 16),
                   _buildTitle(),
                   const SizedBox(height: 32),
-                  _buildForms(),
+                  RegisterForm(controller: _controller),
                   const SizedBox(height: 24),
                   ActionButton(controller: _controller),
-                  if (_controller.showVerificationField) ...[
-                    const SizedBox(height: 16),
-                    _buildResendButton(),
-                  ],
-                  if (!_controller.showVerificationField) 
-                    SocialLogin(controller: _controller),
+                  const SizedBox(height: 16),
+                  SocialLogin(controller: _controller),
                   const SizedBox(height: 40),
                   LinkFooter(controller: _controller),
                 ],
@@ -89,38 +82,14 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   Widget _buildTitle() {
-    return Row(
-      children: [
-        Expanded(
-          child: Text(
-            _controller.showVerificationField
-                ? "Verifikasi Email"
-                : "Daftar Akun Baru",
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 18,
-              color: Colors.black,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildForms() {
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 300),
-      child: _controller.showVerificationField
-          ? VerificationForm(controller: _controller)
-          : RegisterForm(controller: _controller),
-    );
-  }
-
-  Widget _buildResendButton() {
-    return TextButton(
-      onPressed: () => _controller.resendCode(context),
-      child: const Text("Kirim ulang kode"),
+    return const Text(
+      "Daftar Akun Baru",
+      textAlign: TextAlign.center,
+      style: TextStyle(
+        fontSize: 18,
+        color: Colors.black,
+        fontWeight: FontWeight.bold,
+      ),
     );
   }
 

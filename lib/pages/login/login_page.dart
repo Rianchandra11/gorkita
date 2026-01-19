@@ -28,15 +28,15 @@ class _LoginPageState extends State<LoginPage> {
 
   bool _obscurePassword = true;
   bool _isLoading = false;
-  bool _isNavigating = true;
+  bool _isNavigating = false;
 
   final ApiService _apiService = ApiService();
 
   final primary = const Color(0xFF4CAF50);
   final secondary = const Color(0xFF2196F3);
   final subtle = const Color(0xFF648765);
-  final inputBg = const Color(0xFFF8F9FA);
-  final backgroundColor = const Color(0xFFFEFEFE);
+  final inputBg = const Color(0xFFFFFFFF);
+  final backgroundColor = const Color(0xFFFFFFFF) ;
 
   @override
   void initState() {
@@ -50,7 +50,7 @@ class _LoginPageState extends State<LoginPage> {
       backgroundColor: backgroundColor,
       body: SafeArea(
         child: Container(
-          color: Colors.red.withOpacity(0.1), 
+          color: backgroundColor,
           child: Column(
             children: [
               SizedBox(
@@ -233,40 +233,39 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Future<void> _handleLogin() async {
-    if (_isLoading) return;
+Future<void> _handleLogin() async {
+  if (_isLoading || _isNavigating) return; // ✅ TAMBAH CHECK _isNavigating
     
-    if (!_validateLoginInput()) return;
+  if (!_validateLoginInput()) return;
 
-    setState(() => _isLoading = true);
+  setState(() => _isLoading = true);
 
-    try {
-      final result = await _apiService.hybridLogin(
-        _emailController.text,
-        _passwordController.text,
-      );
+  try {
+    final result = await _apiService.hybridLogin(
+      _emailController.text,
+      _passwordController.text,
+    );
 
-      if (result['success'] == true) {
-        print('✅ Login berhasil dari: ${result['login_source']}');
-        final userResult = await _apiService.getUserById(result['user_id']);
-        
-        if (userResult['success'] == true) {
-          _navigateToHome('Login berhasil!', result['user_id']);
-        } else {
-          _showMessage('Login berhasil tetapi gagal mengambil data user', Colors.orange);
-          _navigateToHome('Login berhasil!', result['user_id']);
-        }
+    if (result['success'] == true) {
+      print('✅ Login berhasil dari: ${result['login_source']}');
+      final userResult = await _apiService.getUserById(result['user_id']);
+      
+      if (userResult['success'] == true) {
+        await _navigateToHome('Login berhasil!', result['user_id']); // ✅ TAMBAH await
       } else {
-        _showMessage(result['message'] ?? 'Login gagal', Colors.red);
+        _showMessage('Login berhasil tetapi gagal mengambil data user', Colors.orange);
+        await _navigateToHome('Login berhasil!', result['user_id']); // ✅ TAMBAH await
       }
-    } catch (e) {
-      _showMessage('Terjadi kesalahan: $e', Colors.red);
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
+    } else {
+      _showMessage(result['message'] ?? 'Login gagal', Colors.red);
+      setState(() => _isLoading = false); // ✅ RESET LOADING JIKA GAGAL
     }
+  } catch (e) {
+    _showMessage('Terjadi kesalahan: $e', Colors.red);
+    setState(() => _isLoading = false); // ✅ RESET LOADING JIKA ERROR
   }
+  //  HAPUS finally BLOCK KARENA SUDAH DIHANDLE DI ATAS
+}
 
   void _handleForgotPassword() {
     Navigator.push(
@@ -291,13 +290,21 @@ class _LoginPageState extends State<LoginPage> {
     return true;
   }
 
-  void _navigateToHome(String message, int userId) async {
-    if (_isNavigating) return;
-    _isNavigating = true;
-    
+Future<void> _navigateToHome(String message, int userId) async {
+  // ✅ Cek jika sudah dalam proses navigating
+  if (_isNavigating) return;
+  
+  // ✅ Set flag navigating
+  setState(() => _isNavigating = true);
+  
+  try {
+    // ✅ Tampilkan pesan sukses
     _showMessage(message, Colors.green);
+    
+    // ✅ Tunggu sebentar agar user bisa baca pesan
     await Future.delayed(const Duration(milliseconds: 1500));
     
+    // ✅ Pastikan widget masih mounted sebelum navigasi
     if (mounted) {
       Navigator.pushReplacement(
         context,
@@ -306,9 +313,17 @@ class _LoginPageState extends State<LoginPage> {
         ),
       );
     }
-    
-    _isNavigating = false;
+  } catch (e) {
+    print(' Navigation error: $e');
+    // ✅ Reset state jika ada error
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+        _isNavigating = false;
+      });
+    }
   }
+}
 
   void _showComingSoon(String feature) {
     ScaffoldMessenger.of(context).showSnackBar(

@@ -14,8 +14,9 @@ import 'package:uts_backend/widgets/skeletons/venue_card_skeleton.dart';
 import 'package:uts_backend/widgets/sparring_card.dart';
 import 'package:uts_backend/widgets/venue_card.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-import 'package:provider/provider.dart';  // Tambah buat Provider
-import 'package:uts_backend/database/providers/theme_provider.dart';  // Adjust path kalau beda
+import 'package:provider/provider.dart';  
+import 'package:uts_backend/database/providers/theme_provider.dart'; 
+import 'package:uts_backend/widgets/ad_banner.dart'; 
 
 class HomeScreen extends StatefulWidget {
   final int id;
@@ -387,7 +388,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ),
 
-                        Schedule(isDark: isDark),  // Pass isDark ke Schedule
+                        Schedule(isDark: isDark), 
 
                         Card(
                           color: isDark ? Colors.grey[850] : Colors.white,
@@ -551,7 +552,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                 ),
-                Schedule(isDark: isDark),  // Pass ke Schedule skeleton kalau ada
+                Schedule(isDark: isDark), 
                 Card(
                   color: isDark ? Colors.grey[850] : Colors.white,
                   child: Padding(
@@ -675,62 +676,70 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildVenueSection(bool isDark) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 12),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text(
-                "Venue pilihan untukmu",
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: isDark ? Colors.white : Colors.black87,
-                ),
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Padding(
+        padding: const EdgeInsets.only(left: 12),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(
+              "Venue pilihan untukmu",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: isDark ? Colors.white : Colors.black87,
               ),
-              IconButton(
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => const VenueListScreen(),
-                    ),
-                  );
-                },
-                icon: const Icon(
-                  Icons.arrow_circle_right_sharp,
-                  color: Color.fromRGBO(21, 116, 42, 1),
-                ),
+            ),
+            IconButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const VenueListScreen(),
+                  ),
+                );
+              },
+              icon: const Icon(
+                Icons.arrow_circle_right_sharp,
+                color: Color.fromRGBO(21, 116, 42, 1),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-        SizedBox(
-          width: double.infinity,
-          height: 330,
-          child: ListView.builder(
-            itemBuilder: (context, index) {
-              final venue = _venues[index];
-              return VenueCard(
-                id: venue['venue_id'] ?? 0,
-                url: venue['url'] ?? '',
-                nama: venue['nama_venue'] ?? '',
-                kota: venue['kota'] ?? '',
-                harga: int.tryParse(venue['harga_perjam']?.toString() ?? '0') ?? 0,
-                jumlahrating: venue['total_rating'] ?? 0,
-                rating: (venue['rating'] ?? 0.0).toDouble(),
-                isDark: isDark,  // Pass ke VenueCard
-              );
-            },
-            itemCount: _venues.length,
-            scrollDirection: Axis.horizontal,
-          ),
+      ),
+      SizedBox(
+        width: double.infinity,
+        height: 330,
+        child: ListView.builder(
+          itemBuilder: (context, index) {
+            final venue = _venues[index];
+            return VenueCard(
+              id: venue['venue_id'] ?? 0,
+              url: venue['url'] ?? '',
+              nama: venue['nama_venue'] ?? '',
+              kota: venue['kota'] ?? '',
+              harga: int.tryParse(venue['harga_perjam']?.toString() ?? '0') ?? 0,
+              jumlahrating: venue['total_rating'] ?? 0,
+              rating: (venue['rating'] ?? 0.0).toDouble(),
+              isDark: isDark,
+            );
+          },
+          itemCount: _venues.length,
+          scrollDirection: Axis.horizontal,
         ),
-      ],
-    );
-  }
+      ),
+
+  
+      const Padding(
+        padding: EdgeInsets.symmetric(vertical: 17, horizontal: 12),
+        child: AdBanner(),
+      ),
+
+      const SizedBox(height: 14), 
+    ],
+  );
+}
 
   Widget _buildSparringSkeleton(bool isDark) {
     return Skeletonizer(
@@ -919,7 +928,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 skorSet2: news['skor_set2'],
                 skorSet3: news['skor_set3'],
                 kategori: news['kategori'] ?? '',
-                isDark: isDark,  // Pass ke SparringNewsCard
+                isDark: isDark,  
               );
             },
             itemCount: _sparringNews.length,

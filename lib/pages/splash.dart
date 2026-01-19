@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:uts_backend/pages/login/login_page.dart';
+// import 'package:uts_backend/pages/login/login_page.dart';
 import 'package:uts_backend/pages/register/register_page.dart';
 import 'package:uts_backend/pages/home.dart';
-import 'package:uts_backend/pages/login.dart';
+// import 'package:uts_backend/pages/login.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -220,7 +222,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const LoginPage(),
+                            builder: (context) => LoginPage(),
                           ),
                         );
                       },
