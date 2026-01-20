@@ -8,7 +8,7 @@ void main() {
   testWidgets('shows loading indicator while fetching details', (
     WidgetTester tester,
   ) async {
-    final fetch = (int id) async {
+    Future<VenueModel> fetch(int id) async {
       await Future.delayed(const Duration(seconds: 1));
       return VenueModel(
         venueId: id,
@@ -22,17 +22,15 @@ void main() {
         linkGambar: ['https://example.com/x.jpg'],
         fasilitas: [],
       );
-    };
+    }
 
     await tester.pumpWidget(
       MaterialApp(home: VenueDetailScreen(id: 1, fetchDetails: fetch)),
     );
 
-    // initial frame should show progress indicator
     await tester.pump();
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
 
-    // after delay, content should appear
     await tester.pump(const Duration(seconds: 1));
     await tester.pump();
     expect(find.text('V'), findsWidgets);
@@ -60,29 +58,22 @@ void main() {
         ),
       );
 
-      // allow async fetch
       await tester.pump();
       await tester.pump(const Duration(seconds: 1));
 
-      // title and city in appbar and content
       expect(find.text('DetailVenue'), findsWidgets);
       expect(find.text('Kota Metropolis'), findsWidgets);
 
-      // description
       expect(find.text('A nice place'), findsOneWidget);
 
-      // hours
       expect(find.text('Jam Operasional'), findsOneWidget);
       expect(find.text('09:00 - 21:00'), findsOneWidget);
 
-      // location
       expect(find.text('Lokasi'), findsOneWidget);
       expect(find.text('Jl. Example 123'), findsOneWidget);
 
-      // facility
       expect(find.text('Parkir'), findsOneWidget);
 
-      // price formatting in booking bar
       final expected = NumberFormatter.currency(75000);
       expect(find.text(expected), findsOneWidget);
     },
@@ -112,7 +103,6 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
-    // Image.network errorBuilder should show image_not_supported icon
     expect(find.byIcon(Icons.image_not_supported), findsWidgets);
   });
 
@@ -180,16 +170,13 @@ void main() {
       ),
     );
 
-    // allow async fetch
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
-    // facility names
     expect(find.text('Parkir'), findsOneWidget);
     expect(find.text('Toilet'), findsOneWidget);
     expect(find.text('WiFi'), findsOneWidget);
 
-    // icons from FasilitasIcon mapping
     expect(find.byIcon(Icons.local_parking), findsOneWidget);
     expect(find.byIcon(Icons.wc), findsOneWidget);
     expect(find.byIcon(Icons.wifi), findsOneWidget);

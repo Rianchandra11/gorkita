@@ -22,7 +22,6 @@ void main() {
       MaterialApp(home: VenueListScreen(fetchVenues: () async => [venue])),
     );
 
-    // Wait for the async fetch and rebuild (avoid pumpAndSettle due to image network requests)
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
@@ -64,22 +63,18 @@ void main() {
       MaterialApp(home: VenueListScreen(fetchVenues: () async => [v1, v2, v3])),
     );
 
-    // allow async fetch and rebuild
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
-    // initial: 3 venues
     expect(find.text('3 Venue'), findsOneWidget);
     expect(find.text('Alpha Arena'), findsOneWidget);
     expect(find.text('Beta Field'), findsOneWidget);
 
-    // enter search text and tap search icon
     await tester.enterText(find.byType(TextField), 'Alpha');
     await tester.tap(find.byIcon(Icons.search));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
-    // should show only Alpha
     expect(find.text('Alpha Arena'), findsOneWidget);
     expect(find.text('Beta Field'), findsNothing);
     expect(find.text('1 Venue'), findsOneWidget);
@@ -109,11 +104,9 @@ void main() {
       ),
     );
 
-    // initial frame: loading should be shown
     await tester.pump();
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
 
-    // after fetch completes, list appears
     await tester.pump(const Duration(seconds: 1));
     await tester.pump();
     expect(find.text('Loading Venue'), findsOneWidget);
@@ -126,7 +119,6 @@ void main() {
       MaterialApp(home: VenueListScreen(fetchVenues: () async => [])),
     );
 
-    // allow fetch
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
 
@@ -159,14 +151,12 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
-    // filter down to Alpha
     await tester.enterText(find.byType(TextField), 'Alpha');
     await tester.tap(find.byIcon(Icons.search));
     await tester.pump();
     expect(find.text('Alpha Arena'), findsOneWidget);
     expect(find.text('Beta Field'), findsNothing);
 
-    // clear search
     await tester.enterText(find.byType(TextField), '');
     await tester.tap(find.byIcon(Icons.search));
     await tester.pump();
@@ -196,7 +186,6 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
-    // CachedNetworkImage may show an error icon or the placeholder depending on the test environment.
     final hasBroken = find.byIcon(Icons.broken_image).evaluate().isNotEmpty;
     final hasPlaceholder = find
         .descendant(
@@ -302,19 +291,23 @@ void main() {
       ),
     );
 
-    final controller = ScrollController(initialScrollOffset: (count * 170).toDouble());
+    final controller = ScrollController(
+      initialScrollOffset: (count * 170).toDouble(),
+    );
     await tester.pumpWidget(
-      MaterialApp(home: VenueListScreen(fetchVenues: () async => items, scrollController: controller)),
+      MaterialApp(
+        home: VenueListScreen(
+          fetchVenues: () async => items,
+          scrollController: controller,
+        ),
+      ),
     );
 
-    // allow async fetch
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
-    // initial count shown in header
     expect(find.text('$count Venue'), findsOneWidget);
 
-    // With the controller set to a high initial offset, last items should be built.
     final lastFinder = find.text('Venue ${count - 1}');
     final listFinder = find.byType(ListView);
     expect(listFinder, findsOneWidget);
