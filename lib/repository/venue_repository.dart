@@ -44,7 +44,7 @@ class VenueRepository {
           fromFirestore: BookingModel.fromFirestore,
           toFirestore: (BookingModel booking, options) => booking.toFirestore(),
         )
-        .where("venue_id", isEqualTo: id)
+        .where("venue.venue_id", isEqualTo: id)
         .where("jam_mulai", isGreaterThanOrEqualTo: Timestamp.fromDate(start))
         .where("jam_mulai", isLessThanOrEqualTo: Timestamp.fromDate(end))
         .snapshots();
@@ -52,8 +52,9 @@ class VenueRepository {
     return result;
   }
 
-  static Future<Map<String, String>> insertBooking(
+  static Future<void> insertBooking(
     int venueId,
+    String namaVenue,
     int userId,
     String nama,
     String lapangan,
@@ -62,16 +63,25 @@ class VenueRepository {
   }) async {
     try {
       FirebaseFirestore db = FirebaseFirestore.instance;
-      await db.collection("bookings").add({
-        "venue_id": venueId,
-        "penyewa": {"user_id": userId, "nama": nama},
-        "lapangan": lapangan,
-        "jam_mulai": Timestamp.fromDate(jamMulai),
-        "lama_booking": lamaBooking,
-      });
-      return {"code": "1", "message": "Data berhasil diinput"};
+
+      final BookingModel input = BookingModel(
+        lapangan: lapangan,
+        jamMulai: jamMulai,
+        lamaBooking: lamaBooking,
+        penyewa: UserMiniModel(userId: userId, nama: nama),
+        isReminded: false,
+        venue: VenueMiniModel(venueId: venueId, nama: namaVenue),
+      );
+
+      await db
+          .collection("bookings")
+          .withConverter(
+            fromFirestore: BookingModel.fromFirestore,
+            toFirestore: (BookingModel booking, _) => booking.toFirestore(),
+          )
+          .add(input);
     } catch (e) {
-      return {"code": "0", "message": e.toString()};
+      throw Exception("Gagal insert booking: $e");
     }
   }
 }

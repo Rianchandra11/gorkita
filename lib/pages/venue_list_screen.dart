@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:uts_backend/helper/number_formatter.dart';
 import 'package:uts_backend/model/venue_model.dart';
@@ -169,12 +170,36 @@ class _VenueListScreenState extends State<VenueListScreen> {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(8.0),
-              child: Image.network(
-                venue.linkGambar![0],
+              child: CachedNetworkImage(
+                imageUrl: venue.linkGambar![0],
                 width: 115,
                 height: 150,
                 fit: BoxFit.cover,
+                memCacheWidth: 450,
+                memCacheHeight: 300,
+
+                placeholder: (context, url) => Container(
+                  width: 115,
+                  height: 150,
+                  color: Colors.grey[300],
+                  child: const Center(
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                ),
+
+                errorWidget: (context, url, error) => Container(
+                  width: 115,
+                  height: 150,
+                  color: Colors.grey[300],
+                  child: const Icon(Icons.broken_image),
+                ),
               ),
+              // Image.network(
+              //   venue.linkGambar![0],
+              //   width: 115,
+              //   height: 150,
+              //   fit: BoxFit.cover,
+              // ),
             ),
             const SizedBox(width: 16.0),
             Expanded(

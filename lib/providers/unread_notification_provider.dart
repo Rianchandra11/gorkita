@@ -20,7 +20,7 @@ class UnreadNotificationProvider with ChangeNotifier {
         body: 'Ketuk untuk melihat pesan',
       ),
       schedule: NotificationCalendar.fromDate(
-        date: DateTime.now().add(Duration(seconds: 5)),
+        date: DateTime.now().add(Duration(seconds: 7)),
         allowWhileIdle: true,
       ),
       actionButtons: [

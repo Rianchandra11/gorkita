@@ -59,4 +59,22 @@ class NotificationRepository {
       await batch.commit();
     }
   }
+
+  static Future<void> addNotification(
+    NotificationModel notificationModel,
+  ) async {
+    try {
+      final db = FirebaseFirestore.instance;
+
+      await db
+          .collection("notifications")
+          .withConverter<NotificationModel>(
+            fromFirestore: NotificationModel.fromFirestore,
+            toFirestore: (notification, _) => notification.toFirestore(),
+          )
+          .add(notificationModel);
+    } catch (e) {
+      throw Exception("Gagal menambahkan notifikasi: $e");
+    }
+  }
 }
