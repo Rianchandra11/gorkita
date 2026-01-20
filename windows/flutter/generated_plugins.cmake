@@ -4,10 +4,7 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   awesome_notifications
-<<<<<<< HEAD
-=======
   cloud_firestore
->>>>>>> d163b39770905804eecc648a144d0f0a92123320
   file_selector_windows
   firebase_auth
   firebase_core

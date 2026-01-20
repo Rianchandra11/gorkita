@@ -7,11 +7,6 @@ environment:
   sdk: ^3.8.1
 
 dependencies:
-<<<<<<< HEAD
-
-  awesome_notifications: ^0.10.1
-=======
->>>>>>> d163b39770905804eecc648a144d0f0a92123320
   carousel_slider: ^5.1.1
   cloud_firestore: ^6.1.0
   cupertino_icons: ^1.0.8
