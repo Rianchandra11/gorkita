@@ -22,7 +22,7 @@ class _VenueLocationScreenState extends State<VenueLocationScreen> {
       setState(() {
         listVenue = widget.venueLoc
             .where(
-              (x) => x.namaVenue.toLowerCase().contains(keyword.toLowerCase()),
+              (x) => x.nama!.toLowerCase().contains(keyword.toLowerCase()),
             )
             .toList();
       });
@@ -152,7 +152,7 @@ class _VenueLocationScreenState extends State<VenueLocationScreen> {
       onTap: () {
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) => VenueDetailScreen(id: venue.venueId),
+            builder: (context) => VenueDetailScreen(id: venue.venueId!),
           ),
         );
       },
@@ -164,7 +164,7 @@ class _VenueLocationScreenState extends State<VenueLocationScreen> {
             ClipRRect(
               borderRadius: BorderRadius.circular(8.0),
               child: Image.network(
-                venue.url,
+                venue.linkGambar![0],
                 width: 115,
                 height: 150,
                 fit: BoxFit.cover,
@@ -182,7 +182,7 @@ class _VenueLocationScreenState extends State<VenueLocationScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          venue.namaVenue,
+                          venue.nama!,
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
@@ -240,7 +240,7 @@ class _VenueLocationScreenState extends State<VenueLocationScreen> {
                         Row(
                           children: [
                             Text(
-                              "${NumberFormatter.currency(int.parse(venue.hargaPerjam))}",
+                              "${venue.harga!}",
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16,
