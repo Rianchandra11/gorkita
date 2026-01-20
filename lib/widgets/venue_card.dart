@@ -10,7 +10,7 @@ class VenueCard extends StatelessWidget {
   final double rating;
   final int jumlahrating;
   final int harga;
-  final bool isDark; 
+  final bool isDark;
 
   const VenueCard({
     super.key,
@@ -29,7 +29,9 @@ class VenueCard extends StatelessWidget {
     // Warna dinamis berdasarkan isDark
     final Color cardColor = isDark ? const Color(0xFF1E1E1E) : Colors.white;
     final Color textPrimary = isDark ? Colors.white : Colors.black87;
-    final Color textSecondary = isDark ? Colors.white70 : const Color.fromRGBO(76, 76, 76, 1);
+    final Color textSecondary = isDark
+        ? Colors.white70
+        : const Color.fromRGBO(76, 76, 76, 1);
     final Color shadowColor = isDark ? Colors.black45 : Colors.black12;
 
     return GestureDetector(
@@ -65,7 +67,9 @@ class VenueCard extends StatelessWidget {
               children: [
                 // GAMBAR
                 ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(12),
+                  ),
                   child: Image.network(
                     url,
                     height: 160,
@@ -75,7 +79,10 @@ class VenueCard extends StatelessWidget {
                       return Container(
                         height: 160,
                         color: Colors.grey[300],
-                        child: const Icon(Icons.image_not_supported, color: Colors.grey),
+                        child: const Icon(
+                          Icons.image_not_supported,
+                          color: Colors.grey,
+                        ),
                       );
                     },
                   ),
@@ -115,7 +122,11 @@ class VenueCard extends StatelessWidget {
                             const SizedBox(height: 8),
                             Row(
                               children: [
-                                const Icon(Icons.star_rounded, color: Colors.orange, size: 16),
+                                const Icon(
+                                  Icons.star_rounded,
+                                  color: Colors.orange,
+                                  size: 16,
+                                ),
                                 const SizedBox(width: 2),
                                 Text(
                                   rating.toStringAsFixed(1),

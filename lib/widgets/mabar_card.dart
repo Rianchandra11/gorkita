@@ -1,9 +1,9 @@
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_profile_picture/flutter_profile_picture.dart';
+import 'package:uts_backend/helper/date_formatter.dart';
 import 'package:uts_backend/model/mabar_model.dart';
 import 'package:uts_backend/repository/mabar_repository.dart';
-import 'package:uts_backend/helper/date_formatter.dart';
 import 'package:uts_backend/widgets/skeletons/mabar_card_skeleton.dart';
 
 class MabarCard extends StatelessWidget {
@@ -13,7 +13,7 @@ class MabarCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: MabarRepository.getAll(),
+      future: MabarRepository.get(),
       builder: (context, asyncSnapshot) {
         if (asyncSnapshot.connectionState == ConnectionState.waiting) {
           return Column(
@@ -42,7 +42,10 @@ class MabarCard extends StatelessWidget {
             children: [
               _buildMabarHeader(false),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 24,
+                ),
                 child: Center(
                   child: Text(
                     "Belum ada mabar di areamu 😅",
@@ -103,21 +106,25 @@ class MabarCard extends StatelessWidget {
   }
 
   Container _buildMabarCard(MabarModel data) {
-    final String judul = data.judul;
-    final String levelMinimum = data.levelMinimum;
+    final String judul = data.judul!;
+    final String levelMinimum = data.levelMinimum!;
     final String? levelMaksimum = data.levelMaksimum;
-    final String nama = data.namaVenue;
-    final String kota = data.kota;
-    final DateTime tanggal = data.tanggal;
-    final String jamMulai = data.jamMulai.substring(0, 5);
-    final String jamSelesai = data.jamSelesai.substring(0, 5);
-    final String host = data.host;
-    final String registered = data.register;
-    final int capacity = data.capacity;
-    final List<String> listRegistered = registered.split(", ");
+    final String nama = data.venue!.nama!;
+    final String kota = data.venue!.kota!;
+    final DateTime tanggal = data.tanggal!;
+    final String jamMulai = data.jamMulai!.substring(0, 5);
+    final String jamSelesai = data.jamSelesai!.substring(0, 5);
+    final String host = data.participants![0].name!;
+    final int capacity = data.capacity!;
+    final List<String> listRegistered = data.participants!
+        .skip(1)
+        .map((e) => e.name!)
+        .toList();
 
     final Color cardColor = isDark ? const Color(0xFF1E1E1E) : Colors.white;
-    final Color textColor = isDark ? Colors.white : const Color.fromRGBO(76, 76, 76, 1);
+    final Color textColor = isDark
+        ? Colors.white
+        : const Color.fromRGBO(76, 76, 76, 1);
     final Color subText = isDark ? Colors.white70 : Colors.grey[600]!;
     final Color borderColor = isDark ? Colors.white24 : Colors.black12;
 
@@ -129,7 +136,13 @@ class MabarCard extends StatelessWidget {
         border: Border.all(color: borderColor, width: 0.8),
         boxShadow: isDark
             ? []
-            : [const BoxShadow(color: Colors.black12, blurRadius: 4, spreadRadius: 1)],
+            : [
+                const BoxShadow(
+                  color: Colors.black12,
+                  blurRadius: 4,
+                  spreadRadius: 1,
+                ),
+              ],
       ),
       width: 320,
       padding: const EdgeInsets.all(12),
@@ -139,7 +152,11 @@ class MabarCard extends StatelessWidget {
           Text(
             judul,
             maxLines: 1,
-            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16, color: textColor),
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 16,
+              color: textColor,
+            ),
             overflow: TextOverflow.ellipsis,
           ),
           Text(
