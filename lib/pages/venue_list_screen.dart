@@ -6,7 +6,9 @@ import 'package:uts_backend/pages/venue_detail_screen.dart';
 import 'package:uts_backend/repository/venue_repository.dart';
 
 class VenueListScreen extends StatefulWidget {
-  const VenueListScreen({super.key});
+  final Future<List<VenueModel>> Function()? fetchVenues;
+
+  const VenueListScreen({Key? key, this.fetchVenues}) : super(key: key);
 
   @override
   State<VenueListScreen> createState() => _VenueListScreenState();
@@ -18,7 +20,8 @@ class _VenueListScreenState extends State<VenueListScreen> {
   TextEditingController search = TextEditingController();
 
   getData() async {
-    initList = await VenueRepository.get();
+    final fetch = widget.fetchVenues ?? VenueRepository.get;
+    initList = await fetch();
     setState(() {
       listVenue = initList;
     });
