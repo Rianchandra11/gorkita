@@ -17,6 +17,7 @@ class VenueListScreen extends StatefulWidget {
 class _VenueListScreenState extends State<VenueListScreen> {
   List<VenueModel> initList = [];
   List<VenueModel> listVenue = [];
+  bool isLoading = true;
   TextEditingController search = TextEditingController();
 
   getData() async {
@@ -24,6 +25,7 @@ class _VenueListScreenState extends State<VenueListScreen> {
     initList = await fetch();
     setState(() {
       listVenue = initList;
+      isLoading = false;
     });
   }
 
@@ -82,11 +84,11 @@ class _VenueListScreenState extends State<VenueListScreen> {
           ),
         ),
       ),
-      body: initList.isEmpty
+        body: isLoading
           ? Center(child: CircularProgressIndicator())
           : listVenue.isEmpty
-          ? Center(child: Text("Pencarian Anda tidak ditemukan"))
-          : Column(
+            ? Center(child: Text("Pencarian Anda tidak ditemukan"))
+            : Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Padding(
