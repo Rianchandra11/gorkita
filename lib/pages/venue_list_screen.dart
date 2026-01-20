@@ -8,9 +8,9 @@ import 'package:uts_backend/repository/venue_repository.dart';
 class VenueListScreen extends StatefulWidget {
   final Future<List<VenueModel>> Function()? fetchVenues;
   final Future<VenueModel> Function(int)? fetchDetails;
+  final ScrollController? scrollController;
 
-  const VenueListScreen({Key? key, this.fetchVenues, this.fetchDetails})
-    : super(key: key);
+  const VenueListScreen({Key? key, this.fetchVenues, this.fetchDetails, this.scrollController}) : super(key: key);
 
   @override
   State<VenueListScreen> createState() => _VenueListScreenState();
@@ -114,6 +114,7 @@ class _VenueListScreenState extends State<VenueListScreen> {
                 ),
                 Expanded(
                   child: ListView.builder(
+                    controller: widget.scrollController,
                     padding: const EdgeInsets.only(top: 8.0),
                     itemCount: listVenue.length,
                     itemBuilder: (context, index) {

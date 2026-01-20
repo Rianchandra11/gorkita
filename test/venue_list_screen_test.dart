@@ -284,6 +284,50 @@ void main() {
     final pushed = observer.pushed.last;
     expect(pushed.settings.arguments, equals(77));
   });
+
+  testWidgets('large list scrolls and renders items', (
+    WidgetTester tester,
+  ) async {
+    const count = 300;
+    final items = List<VenueModel>.generate(
+      count,
+      (i) => VenueModel(
+        venueId: i,
+        nama: 'Venue $i',
+        kota: 'City $i',
+        harga: 10000 + i,
+        totalRating: i % 10,
+        rating: 3.5,
+        linkGambar: ['https://example.com/$i.jpg'],
+      ),
+    );
+
+    final controller = ScrollController(initialScrollOffset: (count * 170).toDouble());
+    await tester.pumpWidget(
+      MaterialApp(home: VenueListScreen(fetchVenues: () async => items, scrollController: controller)),
+    );
+
+    // allow async fetch
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    // initial count shown in header
+    expect(find.text('$count Venue'), findsOneWidget);
+
+    // With the controller set to a high initial offset, last items should be built.
+    final lastFinder = find.text('Venue ${count - 1}');
+    final listFinder = find.byType(ListView);
+    expect(listFinder, findsOneWidget);
+
+    int attempts = 0;
+    while (lastFinder.evaluate().isEmpty && attempts < 30) {
+      await tester.fling(listFinder, const Offset(0, -800), 2000);
+      await tester.pump(const Duration(milliseconds: 300));
+      attempts++;
+    }
+
+    expect(lastFinder, findsOneWidget);
+  });
 }
 
 class _TestNavigatorObserver extends NavigatorObserver {
