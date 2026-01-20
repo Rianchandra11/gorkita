@@ -7,8 +7,10 @@ import 'package:uts_backend/repository/venue_repository.dart';
 
 class VenueListScreen extends StatefulWidget {
   final Future<List<VenueModel>> Function()? fetchVenues;
+  final Future<VenueModel> Function(int)? fetchDetails;
 
-  const VenueListScreen({Key? key, this.fetchVenues}) : super(key: key);
+  const VenueListScreen({Key? key, this.fetchVenues, this.fetchDetails})
+    : super(key: key);
 
   @override
   State<VenueListScreen> createState() => _VenueListScreenState();
@@ -84,11 +86,11 @@ class _VenueListScreenState extends State<VenueListScreen> {
           ),
         ),
       ),
-        body: isLoading
+      body: isLoading
           ? Center(child: CircularProgressIndicator())
           : listVenue.isEmpty
-            ? Center(child: Text("Pencarian Anda tidak ditemukan"))
-            : Column(
+          ? Center(child: Text("Pencarian Anda tidak ditemukan"))
+          : Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Padding(
@@ -164,7 +166,11 @@ class _VenueListScreenState extends State<VenueListScreen> {
       onTap: () {
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) => VenueDetailScreen(id: venue.venueId!),
+            settings: RouteSettings(arguments: venue.venueId),
+            builder: (context) => VenueDetailScreen(
+              id: venue.venueId!,
+              fetchDetails: widget.fetchDetails,
+            ),
           ),
         );
       },

@@ -232,4 +232,65 @@ void main() {
     expect(find.text(expected), findsOneWidget);
     expect(find.text('Cari lapangan disini'), findsOneWidget);
   });
+
+  testWidgets('tapping a venue pushes detail route with venue id', (
+    WidgetTester tester,
+  ) async {
+    final v = VenueModel(
+      venueId: 77,
+      nama: 'TapVenue',
+      kota: 'City',
+      harga: 20000,
+      totalRating: 1,
+      rating: 3.0,
+      linkGambar: ['https://example.com/t.jpg'],
+    );
+
+    final observer = _TestNavigatorObserver();
+
+    final detail = VenueModel(
+      venueId: 77,
+      nama: 'TapVenue',
+      kota: 'City',
+      harga: 20000,
+      totalRating: 1,
+      rating: 3.0,
+      linkGambar: ['https://example.com/t.jpg'],
+      deskripsi: 'Desc',
+      jamOperasional: '08:00 - 22:00',
+      jumlahLapangan: 2,
+      alamat: 'Somewhere',
+      fasilitas: [FacilityModel(facilityId: 1, nama: 'Wifi')],
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: VenueListScreen(
+          fetchVenues: () async => [v],
+          fetchDetails: (id) async => detail,
+        ),
+        navigatorObservers: [observer],
+      ),
+    );
+
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(find.text('TapVenue'), findsOneWidget);
+    await tester.tap(find.text('TapVenue'));
+    await tester.pumpAndSettle();
+
+    expect(observer.pushed.length, greaterThanOrEqualTo(1));
+    final pushed = observer.pushed.last;
+    expect(pushed.settings.arguments, equals(77));
+  });
+}
+
+class _TestNavigatorObserver extends NavigatorObserver {
+  final List<Route> pushed = [];
+  @override
+  void didPush(Route route, Route? previousRoute) {
+    pushed.add(route);
+    super.didPush(route, previousRoute);
+  }
 }
