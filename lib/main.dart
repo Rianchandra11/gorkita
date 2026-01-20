@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:uts_backend/database/firebase_option.dart';
@@ -59,14 +60,16 @@ Future<void> main() async {
   try {
     try {
       Firebase.app();
-      print('Firebase app already exists, skipping initialization');
+      if (kDebugMode) debugPrint('Firebase app already exists, skipping initialization');
     } catch (e) {
-      print('Initializing Firebase...');
-      await Firebase.initializeApp(options: DefaultFirebaseOptions.android);
-      print('Firebase initialized successfully');
+      if (kDebugMode) debugPrint('Initializing Firebase...');
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.android,
+      );
+      if (kDebugMode) debugPrint('Firebase initialized successfully');
     }
   } catch (e) {
-    print('Error with Firebase: $e');
+    if (kDebugMode) debugPrint('Error with Firebase: $e');
   }
 
   // Inisialisasi Analytics
@@ -74,15 +77,15 @@ Future<void> main() async {
 
   try {
     await initializeDateFormatting('id_ID', null);
-    print('Date formatting initialized');
+    if (kDebugMode) debugPrint('Date formatting initialized');
   } catch (e) {
-    print('Error initializing date formatting: $e');
-  }
+    if (kDebugMode) debugPrint('Error initializing date formatting: $e');
+  } 
 
   try {
     final authProvider = AuthProvider();
     await authProvider.initialize();
-    print('AuthProvider initialized');
+    if (kDebugMode) debugPrint('AuthProvider initialized');
 
     runApp(
       MultiProvider(
@@ -96,7 +99,7 @@ Future<void> main() async {
       ),
     );
   } catch (e) {
-    print('Error initializing AuthProvider: $e');
+    if (kDebugMode) debugPrint('Error initializing AuthProvider: $e');
     runApp(
       MultiProvider(
         providers: [

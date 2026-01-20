@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:uts_backend/database/database_service.dart';
-import 'package:uts_backend/pages/login.dart';
+import 'package:uts_backend/database/services/app_service.dart';
+import 'package:uts_backend/pages/login/login_page.dart';
 
 class RegisterController {
   // Controllers
@@ -8,8 +8,10 @@ class RegisterController {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPasswordController = TextEditingController();
-  final TextEditingController verificationCodeController = TextEditingController();
+  final TextEditingController confirmPasswordController =
+      TextEditingController();
+  final TextEditingController verificationCodeController =
+      TextEditingController();
 
   // State variables
   bool obscurePassword = true;
@@ -18,7 +20,7 @@ class RegisterController {
   bool isLoading = false;
 
   // API Service
-  final ApiService apiService = ApiService();
+  final AppService apiService = AppService();
 
   // Colors
   final Color primary = const Color(0xFF4CAF50);
@@ -49,10 +51,27 @@ class RegisterController {
     notifyListeners();
 
     try {
-      final emailCheck = await apiService.checkEmailRegistered(emailController.text);
-      
-      if (emailCheck['isRegistered'] == true) {
+      // Check email sudah terdaftar
+      final emailCheck = await apiService.checkEmailRegistered(
+        emailController.text,
+      );
+
+      if (emailCheck == true) {
         showMessage(context, 'Email sudah terdaftar', Colors.red);
+
+        isLoading = false;
+        notifyListeners();
+        return;
+      }
+
+      // Check nomor telepon sudah terdaftar
+      final phoneCheck = await apiService.isPhoneNumberTaken(
+        phoneController.text,
+      );
+
+      if (phoneCheck == true) {
+        showMessage(context, 'No telepon ini sudah digunakan', Colors.red);
+
         isLoading = false;
         notifyListeners();
         return;
@@ -67,10 +86,21 @@ class RegisterController {
       });
 
       if (result['success'] == true) {
-        showMessage(context, 'Registrasi berhasil! Silakan login.', Colors.green);
-        navigateToLoginWithMessage(context, 'Registrasi berhasil! Silakan login.');
+        showMessage(
+          context,
+          'Registrasi berhasil! Silakan login.',
+          Colors.green,
+        );
+        navigateToLoginWithMessage(
+          context,
+          'Registrasi berhasil! Silakan login.',
+        );
       } else {
-        showMessage(context, result['message'] ?? 'Registrasi gagal', Colors.red);
+        showMessage(
+          context,
+          result['message'] ?? 'Registrasi gagal',
+          Colors.red,
+        );
       }
     } catch (e) {
       showMessage(context, 'Terjadi kesalahan: $e', Colors.red);
@@ -88,7 +118,10 @@ class RegisterController {
 
     try {
       showMessage(context, 'Email berhasil diverifikasi!', Colors.green);
-      navigateToLoginWithMessage(context, 'Email berhasil diverifikasi! Silakan login.');
+      navigateToLoginWithMessage(
+        context,
+        'Email berhasil diverifikasi! Silakan login.',
+      );
     } catch (e) {
       showMessage(context, 'Terjadi kesalahan: $e', Colors.red);
     } finally {
@@ -112,7 +145,8 @@ class RegisterController {
       return false;
     }
 
-    if (!emailController.text.contains('@') || !emailController.text.contains('.')) {
+    if (!emailController.text.contains('@') ||
+        !emailController.text.contains('.')) {
       showMessage(context, 'Format email tidak valid', Colors.red);
       return false;
     }
@@ -131,7 +165,8 @@ class RegisterController {
   }
 
   bool validateVerificationInput(BuildContext context) {
-    if (verificationCodeController.text.isEmpty || verificationCodeController.text.length != 6) {
+    if (verificationCodeController.text.isEmpty ||
+        verificationCodeController.text.length != 6) {
       showMessage(context, 'Masukkan 6 digit kode verifikasi', Colors.red);
       return false;
     }
@@ -141,21 +176,26 @@ class RegisterController {
   void navigateToLoginWithMessage(BuildContext context, String message) {
     Navigator.pushAndRemoveUntil(
       context,
-      MaterialPageRoute(builder: (context) => LoginPage.withSuccessMessage(message)),
+      MaterialPageRoute(
+        builder: (context) => LoginPage.withSuccessMessage(message),
+      ),
       (route) => false,
     );
   }
 
   void showComingSoon(BuildContext context, String feature) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('$feature akan segera hadir!'), backgroundColor: primary),
+      SnackBar(
+        content: Text('$feature akan segera hadir!'),
+        backgroundColor: primary,
+      ),
     );
   }
 
   void showMessage(BuildContext context, String message, Color color) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: color),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message), backgroundColor: color));
   }
 
   void togglePasswordVisibility() {

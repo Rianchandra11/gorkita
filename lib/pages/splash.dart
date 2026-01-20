@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:uts_backend/pages/register/register_page.dart';
+import 'package:flutter/foundation.dart';
+import 'package:uts_backend/pages/register/register_page.dart' as register_new;
 import 'package:uts_backend/pages/home.dart';
-import 'package:uts_backend/pages/login.dart';
+import 'package:uts_backend/pages/login/login_page.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -31,7 +32,7 @@ class _SplashScreenState extends State<SplashScreen> {
     
       return null;
     } catch (e) {
-      print('Error checking login status: $e');
+      if (kDebugMode) debugPrint('Error checking login status: $e');
       return null;
     }
   }
@@ -251,7 +252,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const RegisterPage(),
+                            builder: (context) => const register_new.RegisterPage(),
                           ),
                         );
                       },
