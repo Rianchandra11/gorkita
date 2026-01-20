@@ -1,29 +1,34 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:uts_backend/model/jadwal_model.dart';
-import 'package:uts_backend/repository/jadwal_repository.dart';
+import 'package:provider/provider.dart';
 import 'package:uts_backend/helper/date_formatter.dart';
+import 'package:uts_backend/model/booking_model.dart';
+import 'package:uts_backend/providers/booking_reminder_provider.dart';
+import 'package:uts_backend/repository/user_repository.dart';
 import 'package:uts_backend/widgets/skeletons/schedule_skeleton.dart';
 
 class Schedule extends StatefulWidget {
-  const Schedule({super.key, required this.isDark});
+  const Schedule({super.key, required this.isDark, required this.userId});
   final bool isDark;
+  final int userId;
 
   @override
   State<Schedule> createState() => _ScheduleState();
 }
 
 class _ScheduleState extends State<Schedule> {
+  bool _hasData = false;
+
   @override
   Widget build(BuildContext context) {
     final isDark = widget.isDark;
 
+    context.read<BookingReminderProvider>().handlerOnAppStart(widget.userId);
+
     return Column(
       children: [
         Card(
-          color: isDark
-              ? const Color(0xFF1E1E1E)
-              : Colors.white,
+          color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
           elevation: isDark ? 0 : 1,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -31,7 +36,7 @@ class _ScheduleState extends State<Schedule> {
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: FutureBuilder(
-              future: JadwalRepository.getJadwal(),
+              future: UserRepository.getBookingSchedule(widget.userId),
               builder: (context, asyncSnapshot) {
                 if (asyncSnapshot.connectionState == ConnectionState.waiting) {
                   return Column(
@@ -59,13 +64,13 @@ class _ScheduleState extends State<Schedule> {
                     ],
                   );
                 }
-
+                _hasData = true;
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildScheduleHeader(false, isDark),
                     const SizedBox(height: 12),
-                    _buildScheduleCard(asyncSnapshot.data!, isDark),
+                    _buildScheduleCard(asyncSnapshot.data![0], isDark),
                   ],
                 );
               },
@@ -88,7 +93,7 @@ class _ScheduleState extends State<Schedule> {
             color: isDark ? Colors.white : Colors.black,
           ),
         ),
-        if (!isLoading)
+        if (!isLoading && _hasData)
           TextButton(
             onPressed: () {},
             style: TextButton.styleFrom(
@@ -111,15 +116,18 @@ class _ScheduleState extends State<Schedule> {
     );
   }
 
-  Container _buildScheduleCard(JadwalModel data, bool isDark) {
-    String tanggal = DateFormatter.format("dd", data.tanggal);
-    String hari = DateFormatter.format("EEEE", data.tanggal);
-    String nama = data.namaVenue;
-    String waktuMulai = data.jamMulai.substring(0, 5);
-    String waktuSelesai = data.jamSelesai.substring(0, 5);
+  Container _buildScheduleCard(BookingModel data, bool isDark) {
+    String tanggal = DateFormatter.format("dd", data.jamMulai!);
+    String hari = DateFormatter.format("EEEE", data.jamMulai!);
+    String nama = data.venue!.nama!;
+    String waktuMulai = DateFormatter.format("HH:mm", data.jamMulai!);
+    String waktuSelesai = DateFormatter.format(
+      "HH:mm",
+      data.jamMulai!.add(Duration(hours: data.lamaBooking!)),
+    );
     String? lapangan = data.lapangan;
-    List<String> player = data.other.split(" ");
-    String jarak = data.jarak;
+    // List<String> player = data.other.split(" ");
+    // String jarak = data.jarak;
 
     final Color primaryColor = isDark
         ? const Color(0xFF9BE59E)
@@ -188,26 +196,26 @@ class _ScheduleState extends State<Schedule> {
                         softWrap: true,
                       ),
                     ),
-                    Row(
-                      children: [
-                        Icon(
-                          CupertinoIcons.location_solid,
-                          color: isDark
-                              ? Colors.grey[400]
-                              : const Color.fromRGBO(163, 163, 163, 1),
-                          size: 18,
-                        ),
-                        Text(
-                          jarak,
-                          style: TextStyle(
-                            color: isDark
-                                ? Colors.grey[400]
-                                : const Color.fromRGBO(163, 163, 163, 1),
-                            fontSize: 13,
-                          ),
-                        ),
-                      ],
-                    ),
+                    // Row(
+                    //   children: [
+                    //     Icon(
+                    //       CupertinoIcons.location_solid,
+                    //       color: isDark
+                    //           ? Colors.grey[400]
+                    //           : const Color.fromRGBO(163, 163, 163, 1),
+                    //       size: 18,
+                    //     ),
+                    //     Text(
+                    //       jarak,
+                    //       style: TextStyle(
+                    //         color: isDark
+                    //             ? Colors.grey[400]
+                    //             : const Color.fromRGBO(163, 163, 163, 1),
+                    //         fontSize: 13,
+                    //       ),
+                    //     ),
+                    //   ],
+                    // ),
                   ],
                 ),
                 const SizedBox(height: 4),
@@ -219,31 +227,28 @@ class _ScheduleState extends State<Schedule> {
                   ),
                 ),
                 const SizedBox(height: 2),
-                Text(
-                  "(Main Bareng)",
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: isDark ? Colors.grey[400] : Colors.grey[700],
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.people_alt_outlined,
-                      color: Colors.blue,
-                      size: 18,
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      "with ${player[0]} & ${player.length - 1} others",
-                      style: const TextStyle(
-                        color: Colors.blue,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ],
-                ),
+                // Text(
+                //   "(Main Bareng)",
+                //   style: TextStyle(
+                //     fontSize: 12,
+                //     color: isDark ? Colors.grey[400] : Colors.grey[700],
+                //   ),
+                // ),
+                // const SizedBox(height: 6),
+                // Row(
+                //   children: [
+                //     const Icon(
+                //       Icons.people_alt_outlined,
+                //       color: Colors.blue,
+                //       size: 18,
+                //     ),
+                //     const SizedBox(width: 6),
+                //     Text(
+                //       "with ${player[0]} & ${player.length - 1} others",
+                //       style: const TextStyle(color: Colors.blue, fontSize: 14),
+                //     ),
+                //   ],
+                // ),
               ],
             ),
           ),

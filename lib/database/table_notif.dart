@@ -1,5 +1,5 @@
 import 'package:uts_backend/database/database_service.dart';
-import 'package:uts_backend/model/notification_model.dart';
+import 'package:uts_backend/model/sql_model/notification_model.dart';
 
 class TableNotif {
   ApiService dbService = ApiService();
@@ -7,7 +7,7 @@ class TableNotif {
   Future<List<NotificationModel>> getAll() async {
     try {
       final result = await dbService.getNotifications();
-      
+
       if (result['success'] == true) {
         final List<dynamic> data = result['data'];
         return data.map((e) => NotificationModel.fromJson(e)).toList();
@@ -22,7 +22,7 @@ class TableNotif {
   Future<void> delete(int id) async {
     try {
       final result = await dbService.deleteNotification(id);
-      
+
       if (result['success'] != true) {
         throw Exception('Failed to delete notification: ${result['message']}');
       }

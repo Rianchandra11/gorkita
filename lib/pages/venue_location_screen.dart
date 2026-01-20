@@ -1,36 +1,29 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:uts_backend/helper/number_formatter.dart';
 import 'package:uts_backend/model/venue_model.dart';
 import 'package:uts_backend/pages/venue_detail_screen.dart';
-import 'package:uts_backend/repository/venue_repository.dart';
 
-class VenueListScreen extends StatefulWidget {
-  const VenueListScreen({super.key});
+class VenueLocationScreen extends StatefulWidget {
+  final List<VenueModel> venueLoc;
+  const VenueLocationScreen({super.key, required this.venueLoc});
 
   @override
-  State<VenueListScreen> createState() => _VenueListScreenState();
+  State<VenueLocationScreen> createState() => _VenueLocationScreenState();
 }
 
-class _VenueListScreenState extends State<VenueListScreen> {
-  List<VenueModel> initList = [];
+class _VenueLocationScreenState extends State<VenueLocationScreen> {
   List<VenueModel> listVenue = [];
   TextEditingController search = TextEditingController();
 
-  getData() async {
-    initList = await VenueRepository.get();
-    setState(() {
-      listVenue = initList;
-    });
-  }
-
   searchVenue(String keyword) {
     if (keyword == "") {
-      listVenue = initList;
+      listVenue = widget.venueLoc;
     } else {
       setState(() {
-        listVenue = initList
-            .where((x) => x.nama!.toLowerCase().contains(keyword.toLowerCase()))
+        listVenue = widget.venueLoc
+            .where(
+              (x) => x.nama!.toLowerCase().contains(keyword.toLowerCase()),
+            )
             .toList();
       });
     }
@@ -39,8 +32,8 @@ class _VenueListScreenState extends State<VenueListScreen> {
 
   @override
   void initState() {
-    getData();
     // TODO: implement initState
+    listVenue = widget.venueLoc;
     super.initState();
   }
 
@@ -79,7 +72,7 @@ class _VenueListScreenState extends State<VenueListScreen> {
           ),
         ),
       ),
-      body: initList.isEmpty
+      body: widget.venueLoc.isEmpty
           ? Center(child: CircularProgressIndicator())
           : listVenue.isEmpty
           ? Center(child: Text("Pencarian Anda tidak ditemukan"))
@@ -170,36 +163,12 @@ class _VenueListScreenState extends State<VenueListScreen> {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(8.0),
-              child: CachedNetworkImage(
-                imageUrl: venue.linkGambar![0],
+              child: Image.network(
+                venue.linkGambar![0],
                 width: 115,
                 height: 150,
                 fit: BoxFit.cover,
-                memCacheWidth: 450,
-                memCacheHeight: 300,
-
-                placeholder: (context, url) => Container(
-                  width: 115,
-                  height: 150,
-                  color: Colors.grey[300],
-                  child: const Center(
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  ),
-                ),
-
-                errorWidget: (context, url, error) => Container(
-                  width: 115,
-                  height: 150,
-                  color: Colors.grey[300],
-                  child: const Icon(Icons.broken_image),
-                ),
               ),
-              // Image.network(
-              //   venue.linkGambar![0],
-              //   width: 115,
-              //   height: 150,
-              //   fit: BoxFit.cover,
-              // ),
             ),
             const SizedBox(width: 16.0),
             Expanded(
@@ -271,7 +240,7 @@ class _VenueListScreenState extends State<VenueListScreen> {
                         Row(
                           children: [
                             Text(
-                              NumberFormatter.currency(venue.harga!),
+                              "${venue.harga!}",
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16,
@@ -298,51 +267,4 @@ class _VenueListScreenState extends State<VenueListScreen> {
       ),
     );
   }
-
-  // Widget _buildFilterChips() {
-  //   return Container(
-  //     color: Colors.white,
-  //     padding: const EdgeInsets.only(bottom: 12.0),
-  //     child: SingleChildScrollView(
-  //       scrollDirection: Axis.horizontal,
-  //       padding: const EdgeInsets.symmetric(horizontal: 12.0),
-  //       child: Row(
-  //         children: [_buildFilterChip("Filter", icon: Icons.filter_alt)],
-  //       ),
-  //     ),
-  //   );
-  // }
-
-  // Widget _buildFilterChip(String label, {IconData? icon}) {
-  //   return Padding(
-  //     padding: const EdgeInsets.symmetric(horizontal: 4.0),
-  //     child: OutlinedButton(
-  //       onPressed: () {
-  //       },
-  //       style: OutlinedButton.styleFrom(
-  //         foregroundColor: Colors.grey[700],
-  //         backgroundColor: Colors.white,
-  //         side: BorderSide(color: Colors.grey[400]!),
-  //         shape: const StadiumBorder(),
-  //         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-  //       ),
-  //       child:
-  //           (icon != null)
-  //               ? Row(
-  //                 children: [
-  //                   Icon(icon, size: 18, color: Colors.grey[700]),
-  //                   const SizedBox(width: 6),
-  //                   Text(
-  //                     label,
-  //                     style: const TextStyle(fontWeight: FontWeight.normal),
-  //                   ),
-  //                 ],
-  //               )
-  //               : Text(
-  //                 label,
-  //                 style: const TextStyle(fontWeight: FontWeight.normal),
-  //               ),
-  //     ),
-  //   );
-  // }
 }
