@@ -1,3 +1,4 @@
+import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:uts_backend/database/firebase_option.dart';
 import 'package:provider/provider.dart';
@@ -11,7 +12,26 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  AwesomeNotifications().initialize(null, [
+    NotificationChannel(
+      channelKey: 'unread_reminder_channel',
+      channelName: 'Pengingat Pesan Belum Dibaca',
+      channelDescription:
+          'Notifikasi pengingat jika masih ada pesan yang belum dibaca',
+      importance: NotificationImportance.High,
+      defaultColor: Colors.blue,
+      ledColor: Colors.white,
+    ),
+    NotificationChannel(
+      channelKey: 'location',
+      channelName: 'Akses Lokasi Aktif',
+      channelDescription:
+          'Notifikasi pemberitahuan bahwa akses lokasi sedang diaktifikan',
+      importance: NotificationImportance.Low,
+      defaultColor: Colors.blue,
+      ledColor: Colors.white,
+    ),
+  ], debug: true);
   try {
     try {
       Firebase.app();

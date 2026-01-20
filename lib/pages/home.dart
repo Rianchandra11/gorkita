@@ -1,5 +1,7 @@
+import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart' as geo;
 import 'package:uts_backend/database/database_service.dart';
 import 'package:uts_backend/helper/homecachemanager.dart';
 import 'package:uts_backend/model/venue_model.dart';
@@ -17,10 +19,11 @@ import 'package:uts_backend/widgets/skeletons/venue_card_skeleton.dart';
 import 'package:uts_backend/widgets/sparring_card.dart';
 import 'package:uts_backend/widgets/venue_card.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-import 'package:provider/provider.dart'; // Tambah buat Provider
-import 'package:uts_backend/database/providers/theme_provider.dart'; // Adjust path kalau beda
+import 'package:provider/provider.dart';
+import 'package:uts_backend/database/providers/theme_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:geolocator/geolocator.dart';
+
+import 'dart:async';
 
 class HomeScreen extends StatefulWidget {
   final int id;
@@ -45,6 +48,7 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isLoadingSparringNews = true;
   bool locationGranted = false;
   String apaaja = '';
+  StreamSubscription<geo.ServiceStatus>? _serviceStatusStreamSubscription;
 
   List<dynamic> venuesLocation = [];
   final List<Map<String, dynamic>> _dummySparringNews = [
@@ -71,11 +75,56 @@ class _HomeScreenState extends State<HomeScreen> {
       'kategori': 'Tunggal Putra',
     },
   ];
+  @override
+  void dispose() {
+    // Sangat penting untuk membatalkan subscription agar tidak memory leak
+    _serviceStatusStreamSubscription?.cancel();
+    super.dispose();
+  }
 
   @override
   void initState() {
     _loadHomeData();
+    AwesomeNotifications().isNotificationAllowed().then((isAllowed) {
+      if (!isAllowed) {
+        // This is just a basic example. For real apps, you must show some
+        // friendly dialog box before call the request method.
+        // This is very important to not harm the user experience
+        AwesomeNotifications().requestPermissionToSendNotifications();
+      }
+    });
+    ;
+    _listenToGpsStatus();
     super.initState();
+  }
+
+  Future<void> locationNotification() async {
+    await AwesomeNotifications().createNotification(
+      content: NotificationContent(
+        id: 10,
+        channelKey: 'location',
+        actionType: ActionType.Default,
+        title: 'Akses Lokasi Sedang Aktif',
+        body: 'Akses Lokasi sedang diaktifkan',
+        autoDismissible: false,
+      ),
+    );
+  }
+
+  void _listenToGpsStatus() {
+    _serviceStatusStreamSubscription = geo.Geolocator.getServiceStatusStream()
+        .listen((geo.ServiceStatus status) {
+          if (status == geo.ServiceStatus.enabled) {
+            print("GPS Aktif");
+          } else {
+            print("GPS Mati");
+            AwesomeNotifications().cancel(10);
+            setState(() {
+              locationGranted = false;
+              _venueLocation = [];
+            });
+          }
+        });
   }
 
   Future<void> getGorLocation(double lat, double lon) async {
@@ -89,7 +138,7 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       locationGranted = true;
       _venueLocation = _venues.where((e) => e['kota'] == namaKota).toList();
-      
+
       apaaja = namaKota;
     });
   }
@@ -99,9 +148,10 @@ class _HomeScreenState extends State<HomeScreen> {
     if (status.isDenied) {
       Permission.location.request();
     } else if (status.isGranted) {
-      var loc = await Geolocator.getCurrentPosition();
+      var loc = await geo.Geolocator.getCurrentPosition();
 
       getGorLocation(loc.latitude, loc.longitude);
+      locationNotification();
     } else if (status.isPermanentlyDenied) {
       openAppSettings();
     }
