@@ -2,7 +2,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:uts_backend/helper/fasilitas_icon.dart';
 import 'package:uts_backend/helper/number_formatter.dart';
-import 'package:uts_backend/model/venue_detail_model.dart';
+import 'package:uts_backend/model/venue_model.dart';
 import 'package:uts_backend/pages/booking/choose_booking_schedule_screen.dart';
 import 'package:uts_backend/repository/venue_repository.dart';
 
@@ -15,10 +15,10 @@ class VenueDetailScreen extends StatefulWidget {
 }
 
 class _VenueDetailScreenState extends State<VenueDetailScreen> {
-  VenueDetailModel? data;
+  VenueModel? data;
 
   getData() async {
-    data = await VenueRepository.getVenueDetail(widget.id);
+    data = await VenueRepository.getDetails(widget.id);
     setState(() {});
   }
 
@@ -41,7 +41,7 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    data!.namaVenue,
+                    data!.nama!,
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -59,7 +59,7 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                       viewportFraction: 1,
                       autoPlay: true,
                     ),
-                    items: data!.linkGambar.map((e) {
+                    items: data!.linkGambar!.map((e) {
                       return Builder(
                         builder: (BuildContext context) {
                           return Container(
@@ -91,7 +91,7 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          data!.namaVenue,
+                          data!.nama!,
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
@@ -127,7 +127,7 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                           ],
                         ),
                         const SizedBox(height: 16),
-                        Text(data!.deskripsi, style: TextStyle(fontSize: 16)),
+                        Text(data!.deskripsi!, style: TextStyle(fontSize: 16)),
                       ],
                     ),
                   ),
@@ -160,7 +160,7 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text('Senin - Minggu', style: TextStyle(fontSize: 16)),
-              Text(data!.jamOperasional, style: TextStyle(fontSize: 16)),
+              Text(data!.jamOperasional!, style: TextStyle(fontSize: 16)),
             ],
           ),
         ],
@@ -187,7 +187,9 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
             crossAxisSpacing: 8,
             mainAxisSpacing: 12,
             children: [
-              ...data!.fasilitas.map((e) => _FacilityItem(dataFasilitas: e)),
+              ...data!.fasilitas!.map(
+                (e) => _FacilityItem(id: e.facilityId!, nama: e.nama!),
+              ),
             ],
           ),
         ],
@@ -206,7 +208,7 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
-          Text(data!.alamat, style: TextStyle(fontSize: 16)),
+          Text(data!.alamat!, style: TextStyle(fontSize: 16)),
         ],
       ),
     );
@@ -247,7 +249,7 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
               Row(
                 children: [
                   Text(
-                    NumberFormatter.currency(int.parse(data!.hargaPerjam)),
+                    NumberFormatter.currency(data!.harga!),
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
@@ -269,9 +271,11 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => ChooseBookingScheduleScreen(
-                    venueId: data!.venueId,
-                    jamOperasional: data!.jamOperasional,
-                    harga: data!.hargaPerjam,
+                    venueId: data!.venueId!,
+                    jamOperasional: data!.jamOperasional!,
+                    harga: "${data!.harga!}",
+                    jumlahLapangan: data!.jumlahLapangan!,
+                    namaVenue: data!.nama!,
                   ),
                 ),
               );
@@ -296,25 +300,18 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
 }
 
 class _FacilityItem extends StatelessWidget {
-  final FasilitasModel dataFasilitas;
-  const _FacilityItem({required this.dataFasilitas});
+  final int id;
+  final String nama;
+  const _FacilityItem({required this.id, required this.nama});
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(
-          FasilitasIcon.get(int.parse(dataFasilitas.id)),
-          size: 22,
-          color: Colors.black,
-        ),
+        Icon(FasilitasIcon.get(id), size: 22, color: Colors.black),
         const SizedBox(width: 12),
         Expanded(
-          child: Text(
-            dataFasilitas.nama,
-            style: TextStyle(fontSize: 14),
-            softWrap: true,
-          ),
+          child: Text(nama, style: TextStyle(fontSize: 14), softWrap: true),
         ),
       ],
     );

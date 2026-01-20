@@ -1,5 +1,6 @@
 class BaseUrl {
-  static const String url = 'https://doug-uninstructing-furcately.ngrok-free.dev';
+  static const String url =
+      'https://rapt-palaeoecological-brandie.ngrok-free.dev';
 }
 
 // class BaseUrl {
