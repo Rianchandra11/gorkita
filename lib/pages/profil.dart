@@ -6,7 +6,7 @@ import 'package:uts_backend/services/reward_service.dart';
 import 'package:uts_backend/providers/auth_provider.dart';
 import 'package:uts_backend/pages/forget_password.dart';
 import 'package:uts_backend/pages/kupon_saya_page.dart';
-import 'package:uts_backend/pages/login/login_page.dart';
+import 'package:uts_backend/pages/login/login_page/login_page.dart';
 import 'package:uts_backend/pages/reward_page.dart';
 import 'package:uts_backend/widgets/phone_input_field.dart';
 import 'package:uts_backend/widgets/skeleton_loader.dart';
@@ -16,15 +16,28 @@ import 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
 import 'dart:io';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uts_backend/providers/theme_provider.dart';
+import 'package:uts_backend/helper/image_picker_helper.dart'; // sesuaikan path kalau beda
+import 'dart:typed_data';
 import 'dart:convert';
 
 class Profil extends StatefulWidget {
   final int id;
-  const Profil({super.key, required this.id});
+  final bool testMode;
+
+  const Profil({
+    super.key,
+    required this.id,
+    this.testMode = false,
+  });
 
   @override
   State<Profil> createState() => _ProfilState();
 }
+
+
+  // @override
+  // State<Profil> createState() => _ProfilState();
+
 
 class _ProfilState extends State<Profil> {
 
@@ -653,6 +666,88 @@ class _ProfilState extends State<Profil> {
       if (kDebugMode) debugPrint('Error saving image: $e');
     }
   }
+  Future<void> _saveProfileImage(Uint8List bytes) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final String imageData = base64Encode(bytes);
+      await prefs.setString('profile_image_${widget.id}', imageData);
+    } catch (e) {
+      print('Error saving image: $e');
+    }
+  }
+  Widget _buildTestUI(BuildContext context) {
+  return Scaffold(
+    body: Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text('Profil Test'),
+          const SizedBox(height: 16),
+
+            IconButton(
+            key: const Key('camera_button'),
+            icon: const Icon(Icons.camera_alt),
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (_) => AlertDialog(
+                  title: const Text('Ubah Foto Profil'),
+                  actions: [
+                    TextButton.icon(
+                      icon: const Icon(Icons.photo),
+                      label: const Text('Galeri'),
+                      onPressed: () {},
+                    ),
+                    TextButton.icon(
+                      icon: const Icon(Icons.camera),
+                      label: const Text('Kamera'),
+                      onPressed: () {},
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Batal'),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+
+  // 2. GANTI SELURUH fungsi _pickImage() lama dengan ini (hapus yang lama!)
+Future<void> _pickImage() async {
+  // 🛑 JIKA TEST MODE → JANGAN UPLOAD KE BACKEND
+  if (widget.testMode) {
+    return;
+  }
+
+  File? pickedFile = await ImagePickerHelper.pickImage(context);
+
+  if (pickedFile != null) {
+    Uint8List bytes = await pickedFile.readAsBytes();
+
+    await _saveProfileImage(bytes);
+
+    String imageUrl = "user_${widget.id}_profile";
+
+    // 🛡️ AMAN DARI NULL + FIREBASE
+    if (user != null) {
+      await user!.uploadProfileImage(widget.id, imageUrl);
+    }
+
+    setState(() {
+      _profileImageBytes = bytes;
+    });
+
+    _showMessage('Foto profil berhasil diubah!', Colors.green);
+  }
+}
+
 
   Widget _buildProfileImage(ThemeProvider themeProvider) {
     return Container(

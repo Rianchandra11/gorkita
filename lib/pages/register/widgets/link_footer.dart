@@ -16,9 +16,7 @@ class LinkFooter extends StatelessWidget {
           style: TextStyle(color: controller.subtle, fontSize: 12),
         ),
         GestureDetector(
-          onTap: controller.showVerificationField
-              ? () => controller.showVerificationField = false
-              : () => controller.navigateToLogin(context),
+          onTap: () => controller.navigateToLogin(context),
           child: Text(
             controller.showVerificationField ? "form daftar" : "Masuk",
             style: TextStyle(

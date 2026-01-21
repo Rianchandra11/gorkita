@@ -26,6 +26,10 @@ import 'package:uts_backend/providers/theme_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import 'dart:async';
+import 'package:skeletonizer/skeletonizer.dart';
+import 'package:provider/provider.dart';  
+import 'package:uts_backend/database/providers/theme_provider.dart'; 
+import 'package:uts_backend/widgets/ad_banner.dart'; 
 
 class HomeScreen extends StatefulWidget {
   final int id;

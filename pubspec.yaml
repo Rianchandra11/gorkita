@@ -8,6 +8,7 @@ environment:
 
 dependencies:
   carousel_slider: ^5.1.1
+  cloud_firestore: ^6.1.0
   cupertino_icons: ^1.0.8
   dotted_border: ^3.1.0
   firebase_analytics: ^12.1.1
@@ -36,6 +37,10 @@ dependencies:
   country_flags: ^4.1.0
   flutter_localization: ^0.3.3
   marquee: ^2.3.0
+  flutter_local_notifications: ^17.2.2 
+  timezone: ^0.9.4
+  google_mobile_ads: ^5.1.0
+  
 
   awesome_notifications: ^0.10.0
   google_mobile_ads: ^7.0.0

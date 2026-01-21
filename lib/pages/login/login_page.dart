@@ -514,7 +514,7 @@ class _LoginPageState extends State<LoginPage>
       return;
     }
 
-    setState(() => _isLoading = true);
+  setState(() => _isLoading = true);
 
     try {
       // Optimized: Use AccountManager
