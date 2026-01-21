@@ -5,6 +5,7 @@ import 'package:uts_backend/helper/firebase_option.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:uts_backend/controllers/notification_controller.dart';
+import 'package:uts_backend/pages/home.dart';
 import 'package:uts_backend/pages/splash.dart';
 import 'package:uts_backend/providers/booking_reminder_provider.dart';
 import 'package:uts_backend/providers/unread_notification_provider.dart';
@@ -158,7 +159,7 @@ class _MyAppState extends State<MyApp> {
       navigatorObservers: [
         FirebaseAnalyticsObserver(analytics: widget.analytics),
       ],
-      home: SplashScreen(),
+      home: WelcomeScreen(),
     );
   }
 }

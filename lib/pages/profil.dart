@@ -1538,13 +1538,16 @@ class _ProfilState extends State<Profil> {
                       child: Column(
                         children: [
                           _BuildItem('Ubah Password', Icons.lock, () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    const HalamanAturUlangPassword(email: ''),
-                              ),
-                            );
+                            ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(backgroundColor: Colors.green, content: Text('Maaf, fitur ini sedang dikembangkan !')),
+                                          );
+                            // Navigator.push(
+                            //   context,
+                            //   MaterialPageRoute(
+                            //     builder: (context) =>
+                            //         const HalamanAturUlangPassword(email: ''),
+                            //   ),
+                            // );
                           }, themeProvider),
                         ],
                       ),

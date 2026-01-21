@@ -428,14 +428,9 @@ class _KuponSayaPageState extends State<KuponSayaPage>
                 child: ElevatedButton(
                   onPressed: () {
                     Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          'Kupon akan otomatis tersedia saat checkout booking',
-                        ),
-                        backgroundColor: Colors.green,
-                      ),
-                    );
+                     ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(backgroundColor: Colors.green, content: Text('Maaf, fitur ini sedang dikembangkan !')),
+                                          );
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: isDiscount ? Colors.green : Colors.purple,

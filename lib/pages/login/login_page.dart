@@ -39,7 +39,9 @@ class _LoginPageState extends State<LoginPage>
   static const Color primaryLight = Color(0xFF4CAF50);
   static const Color primaryDark = Color(0xFF1B5E20);
   static const Color bgColor = Color(0xFFF5F7FA);
-  static const Color cardColor = Color(0xFFF7F8FA); // Soft white-grey, simulates opacity
+  static const Color cardColor = Color(
+    0xFFF7F8FA,
+  ); // Soft white-grey, simulates opacity
   static const Color textDark = Color(0xFF1A1A2E);
   static const Color textMuted = Color(0xFF6B7280);
   static const Color inputBg = Color(0xFFF8FAFB);
@@ -51,15 +53,14 @@ class _LoginPageState extends State<LoginPage>
       vsync: this,
       duration: const Duration(milliseconds: 800),
     );
-    _fadeAnim = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _animController!, curve: Curves.easeOut),
-    );
-    _slideAnim = Tween<Offset>(
-      begin: const Offset(0, 0.08),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(parent: _animController!, curve: Curves.easeOutCubic),
-    );
+    _fadeAnim = Tween<double>(
+      begin: 0,
+      end: 1,
+    ).animate(CurvedAnimation(parent: _animController!, curve: Curves.easeOut));
+    _slideAnim = Tween<Offset>(begin: const Offset(0, 0.08), end: Offset.zero)
+        .animate(
+          CurvedAnimation(parent: _animController!, curve: Curves.easeOutCubic),
+        );
 
     _animController!.forward();
     _showSuccessMessageIfAny();
@@ -121,8 +122,6 @@ class _LoginPageState extends State<LoginPage>
       ),
     );
   }
-
-
 
   // ════════════════════════════════════════════════════════════
   // 🎨 LOGO SECTION
@@ -254,7 +253,11 @@ class _LoginPageState extends State<LoginPage>
       child: Row(
         children: [
           const SizedBox(width: 14),
-          Icon(icon, color: Color(0xFFB0B4BA), size: 18), // Muted grey, no opacity
+          Icon(
+            icon,
+            color: Color(0xFFB0B4BA),
+            size: 18,
+          ), // Muted grey, no opacity
           const SizedBox(width: 10),
           Expanded(
             child: TextField(
@@ -302,7 +305,12 @@ class _LoginPageState extends State<LoginPage>
     return Align(
       alignment: Alignment.centerRight,
       child: GestureDetector(
-        onTap: _handleForgotPassword,
+        onTap: () {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Maaf fitur ini sedang dikembangkan !')),
+          );
+        },
+        // onTap: _handleForgotPassword,
         child: const Text(
           "Lupa Password?",
           style: TextStyle(
@@ -464,11 +472,8 @@ class _LoginPageState extends State<LoginPage>
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
-          "Belum punya akun? ",
-          style: TextStyle(
-            color: textMuted.withAlpha(8),
-            fontSize: 12,
-          ),
+          "Sudah punya akun? ",
+          style: TextStyle(color: textMuted.withAlpha(204), fontSize: 12),
         ),
         GestureDetector(
           onTap: () => Navigator.pushReplacement(
@@ -514,7 +519,7 @@ class _LoginPageState extends State<LoginPage>
       return;
     }
 
-  setState(() => _isLoading = true);
+    setState(() => _isLoading = true);
 
     try {
       // Optimized: Use AccountManager
@@ -523,7 +528,7 @@ class _LoginPageState extends State<LoginPage>
       if (result['success'] == true) {
         final userId = result['user_id'] ?? 0;
         _showSnackbar("Login berhasil!", primaryLight);
-        
+
         // Optimized: Faster navigation (reduce delay)
         await Future.delayed(const Duration(milliseconds: 400));
         _navigateToHome(userId);
@@ -554,7 +559,7 @@ class _LoginPageState extends State<LoginPage>
           isNewUser ? "Registrasi Google berhasil!" : "Login Google berhasil!",
           primaryLight,
         );
-        
+
         // Optimized: Faster navigation
         await Future.delayed(const Duration(milliseconds: 400));
         _navigateToHome(userId);

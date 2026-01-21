@@ -312,9 +312,15 @@ class _HomeScreenState extends State<HomeScreen> {
                                   Expanded(
                                     child: TextField(
                                       controller: searchInput,
+                                      onChanged: (value){
+                                                                        ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(content: Text('Maaf, fitur ini sedang dikembangkan !')),
+                                          );
+                                      },
                                       decoration: InputDecoration(
                                         contentPadding: const EdgeInsets.all(0),
                                         hintText: "Cari GOR, Pengguna",
+                                        
                                         hintStyle: TextStyle(
                                           color: Colors.grey[600],
                                         ),
@@ -372,12 +378,20 @@ class _HomeScreenState extends State<HomeScreen> {
                                       QuickMenuItem(
                                         icon: Icons.groups,
                                         name: "Main Bareng",
-                                        onTap: () {},
+                                        onTap: () {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(backgroundColor: Colors.green, content: Text('Maaf, fitur ini sedang dikembangkan !')),
+                                          );
+                                        },
                                       ),
                                       QuickMenuItem(
                                         icon: Icons.handshake,
                                         name: "Komunitas",
-                                        onTap: () {},
+                                        onTap: () {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(backgroundColor: Colors.green, content: Text('Maaf, fitur ini sedang dikembangkan !')),
+                                          );
+                                        },
                                       ),
                                     ],
                                   ),
