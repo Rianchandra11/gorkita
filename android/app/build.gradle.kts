@@ -17,15 +17,19 @@ dependencies {
 
   // Add the dependencies for any other desired Firebase products
   // https://firebase.google.com/docs/android/setup#available-libraries
+  
+  // Core library desugaring for flutter_local_notifications
+  coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 }
 android {
     namespace = "com.example.uts_backend"
-    compileSdk = 35
+    compileSdk = 36
     ndkVersion = "27.0.12077973"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+        isCoreLibraryDesugaringEnabled = true
     }
 
     kotlinOptions {
@@ -37,7 +41,7 @@ android {
         applicationId = "com.example.uts_backend"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = 23
+        minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName

@@ -1,78 +1,112 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+import 'package:uts_backend/database/services/account_manager.dart';
 import '../register_controller.dart';
 
-class SocialLogin extends StatelessWidget {
+class SocialLogin extends StatefulWidget {
   final RegisterController controller;
 
   const SocialLogin({super.key, required this.controller});
 
   @override
+  State<SocialLogin> createState() => _SocialLoginState();
+}
+
+class _SocialLoginState extends State<SocialLogin> {
+  // Optimized: Use AccountManager
+  final AccountManager _layananAplikasi = AccountManager();
+  bool _sedangMemuat = false;
+
+  Future<void> _tanganiPendaftaranGoogle() async {
+    setState(() => _sedangMemuat = true);
+
+    try {
+      final hasil = await _layananAplikasi.googleLogin();
+
+      if (hasil['success'] == true) {
+        final nama = hasil['displayName'] ?? 'User';
+        final email = hasil['email'] ?? '';
+
+        if (kDebugMode) {
+          debugPrint('Google register berhasil!');
+          debugPrint('Nama: $nama');
+          debugPrint('Email: $email');
+        }
+
+        // Set nama otomatis dari Google
+        widget.controller.nameController.text = nama;
+        widget.controller.emailController.text = email;
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Selamat datang, $nama!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+          // Arahkan ke home
+          Navigator.of(context).pushReplacementNamed('/home');
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(hasil['message'] ?? 'Pendaftaran Google gagal'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) debugPrint('Error pendaftaran Google: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Terjadi kesalahan: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _sedangMemuat = false);
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        const SizedBox(height: 24),
-        Row(
-          children: [
-            const Expanded(child: Divider(thickness: 1)),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: Text(
-                "Atau daftar dengan",
-                style: TextStyle(color: controller.subtle, fontSize: 13),
-              ),
-            ),
-            const Expanded(child: Divider(thickness: 1)),
-          ],
+    return SizedBox(
+      width: double.infinity,
+      height: 48,
+      child: OutlinedButton.icon(
+        style: OutlinedButton.styleFrom(
+          backgroundColor: Colors.white,
+          side: BorderSide(color: Colors.grey[300]!, width: 1),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
         ),
-        const SizedBox(height: 24),
-        Row(
-          children: [
-            Expanded(
-              child: OutlinedButton.icon(
-                style: OutlinedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  side: BorderSide(color: controller.inputBg),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  padding: const EdgeInsets.symmetric(vertical: 14),
+        onPressed: _sedangMemuat ? null : _tanganiPendaftaranGoogle,
+        icon: _sedangMemuat
+            ? const SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation(Colors.red),
                 ),
-                onPressed: () => controller.showComingSoon(context, 'Google Sign-In'),
-                icon: const Icon(Icons.g_mobiledata, size: 28, color: Colors.red),
-                label: const Text(
-                  "Google",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: controller.secondary,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                ),
-                onPressed: () => controller.showComingSoon(context, 'Facebook Sign-In'),
-                icon: const Icon(Icons.facebook, size: 22, color: Colors.white),
-                label: const Text(
-                  "Facebook",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
-          ],
+              )
+            : const Icon(Icons.g_mobiledata, size: 18, color: Colors.red),
+        label: Text(
+          _sedangMemuat ? "Menghubungkan..." : "Google",
+          style: const TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 13,
+            color: Colors.black87,
+          ),
         ),
-      ],
+      ),
     );
   }
 }

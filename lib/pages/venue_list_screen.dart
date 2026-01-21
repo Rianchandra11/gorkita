@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:uts_backend/helper/number_formatter.dart';
 import 'package:uts_backend/model/venue_model.dart';
@@ -17,7 +18,7 @@ class _VenueListScreenState extends State<VenueListScreen> {
   TextEditingController search = TextEditingController();
 
   getData() async {
-    initList = await VenueRepository.getAll();
+    initList = await VenueRepository.get();
     setState(() {
       listVenue = initList;
     });
@@ -28,13 +29,9 @@ class _VenueListScreenState extends State<VenueListScreen> {
       listVenue = initList;
     } else {
       setState(() {
-        listVenue =
-            initList
-                .where(
-                  (x) =>
-                      x.namaVenue.toLowerCase().contains(keyword.toLowerCase()),
-                )
-                .toList();
+        listVenue = initList
+            .where((x) => x.nama!.toLowerCase().contains(keyword.toLowerCase()))
+            .toList();
       });
     }
     setState(() {});
@@ -82,48 +79,44 @@ class _VenueListScreenState extends State<VenueListScreen> {
           ),
         ),
       ),
-      body:
-          initList.isEmpty
-              ? Center(child: CircularProgressIndicator())
-              : listVenue.isEmpty
-              ? Center(child: Text("Pencarian Anda tidak ditemukan"))
-              : Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16.0, 12, 0, 8.0),
-                    child: Row(
-                      children: [
-                        Text(
-                          "Menampilkan ",
-                          style: TextStyle(
-                            color: Colors.grey[800],
-                            fontSize: 14,
-                          ),
+      body: initList.isEmpty
+          ? Center(child: CircularProgressIndicator())
+          : listVenue.isEmpty
+          ? Center(child: Text("Pencarian Anda tidak ditemukan"))
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16.0, 12, 0, 8.0),
+                  child: Row(
+                    children: [
+                      Text(
+                        "Menampilkan ",
+                        style: TextStyle(color: Colors.grey[800], fontSize: 14),
+                      ),
+                      Text(
+                        "${listVenue.length} Venue",
+                        style: TextStyle(
+                          color: Colors.grey[800],
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
                         ),
-                        Text(
-                          "${listVenue.length} Venue",
-                          style: TextStyle(
-                            color: Colors.grey[800],
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                  Expanded(
-                    child: ListView.builder(
-                      padding: const EdgeInsets.only(top: 8.0),
-                      itemCount: listVenue.length,
-                      itemBuilder: (context, index) {
-                        final venue = listVenue[index];
-                        return _buildVenueCard(venue);
-                      },
-                    ),
+                ),
+                Expanded(
+                  child: ListView.builder(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    itemCount: listVenue.length,
+                    itemBuilder: (context, index) {
+                      final venue = listVenue[index];
+                      return _buildVenueCard(venue);
+                    },
                   ),
-                ],
-              ),
+                ),
+              ],
+            ),
     );
   }
 
@@ -166,7 +159,7 @@ class _VenueListScreenState extends State<VenueListScreen> {
       onTap: () {
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) => VenueDetailScreen(id: venue.venueId),
+            builder: (context) => VenueDetailScreen(id: venue.venueId!),
           ),
         );
       },
@@ -177,12 +170,36 @@ class _VenueListScreenState extends State<VenueListScreen> {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(8.0),
-              child: Image.network(
-                venue.url,
+              child: CachedNetworkImage(
+                imageUrl: venue.linkGambar![0],
                 width: 115,
                 height: 150,
                 fit: BoxFit.cover,
+                memCacheWidth: 450,
+                memCacheHeight: 300,
+
+                placeholder: (context, url) => Container(
+                  width: 115,
+                  height: 150,
+                  color: Colors.grey[300],
+                  child: const Center(
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                ),
+
+                errorWidget: (context, url, error) => Container(
+                  width: 115,
+                  height: 150,
+                  color: Colors.grey[300],
+                  child: const Icon(Icons.broken_image),
+                ),
               ),
+              // Image.network(
+              //   venue.linkGambar![0],
+              //   width: 115,
+              //   height: 150,
+              //   fit: BoxFit.cover,
+              // ),
             ),
             const SizedBox(width: 16.0),
             Expanded(
@@ -196,7 +213,7 @@ class _VenueListScreenState extends State<VenueListScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          venue.namaVenue,
+                          venue.nama!,
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
@@ -254,7 +271,7 @@ class _VenueListScreenState extends State<VenueListScreen> {
                         Row(
                           children: [
                             Text(
-                              "${NumberFormatter.currency(int.parse(venue.hargaPerjam))}",
+                              NumberFormatter.currency(venue.harga!),
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16,

@@ -12,17 +12,20 @@ class LinkFooter extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
-          controller.showVerificationField ? "Kembali ke " : "Sudah punya akun?",
-          style: TextStyle(color: controller.subtle),
+          controller.showVerificationField ? "Kembali ke " : "Sudah punya akun? ",
+          style: TextStyle(color: controller.subtle, fontSize: 12),
         ),
-        const SizedBox(width: 4),
         GestureDetector(
           onTap: controller.showVerificationField
               ? () => controller.showVerificationField = false
               : () => controller.navigateToLogin(context),
           child: Text(
             controller.showVerificationField ? "form daftar" : "Masuk",
-            style: TextStyle(fontWeight: FontWeight.bold, color: controller.primary),
+            style: TextStyle(
+              fontWeight: FontWeight.w700,
+              fontSize: 12,
+              color: controller.primary,
+            ),
           ),
         ),
       ],
