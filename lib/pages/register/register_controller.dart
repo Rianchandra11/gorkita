@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:uts_backend/services/app_service.dart';
-import 'package:uts_backend/pages/login/login_page/login_page.dart';
-import 'package:uts_backend/helper/notification_helper.dart'; 
-import 'package:uts_backend/widgets/ad_interstitial.dart'; 
+import 'package:uts_backend/pages/login/login_page.dart';
 
 class RegisterController with ChangeNotifier {
   final TextEditingController nameController = TextEditingController();
@@ -28,10 +26,6 @@ class RegisterController with ChangeNotifier {
   final Color subtle = const Color(0xFF648765);
   final Color inputBg = const Color(0xFFF0F4F0);
 
-  bool get obscurePassword => _obscurePassword;
-  bool get obscureConfirmPassword => _obscureConfirmPassword;
-  bool get isLoading => _isLoading;
-
   void handleBackPressed(BuildContext context) {
     Navigator.pop(context);
   }
@@ -46,7 +40,7 @@ class RegisterController with ChangeNotifier {
   Future<void> handleRegister(BuildContext context) async {
     if (!validateRegistrationInput(context)) return;
 
-    _isLoading = true;
+    isLoading = true;
     notifyListeners();
 
     try {
@@ -136,7 +130,11 @@ class RegisterController with ChangeNotifier {
     final password = passwordController.text;
     final confirmPassword = confirmPasswordController.text;
 
-    if (name.isEmpty || email.isEmpty || phone.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
+    if (name.isEmpty ||
+        email.isEmpty ||
+        phone.isEmpty ||
+        password.isEmpty ||
+        confirmPassword.isEmpty) {
       showMessage(context, 'Semua field harus diisi', Colors.red);
       return false;
     }
@@ -196,12 +194,12 @@ class RegisterController with ChangeNotifier {
   }
 
   void togglePasswordVisibility() {
-    _obscurePassword = !_obscurePassword;
+    obscurePassword = !obscurePassword;
     notifyListeners();
   }
 
   void toggleConfirmPasswordVisibility() {
-    _obscureConfirmPassword = !_obscureConfirmPassword;
+    obscureConfirmPassword = !obscureConfirmPassword;
     notifyListeners();
   }
 
@@ -213,6 +211,7 @@ class RegisterController with ChangeNotifier {
     passwordController.dispose();
     confirmPasswordController.dispose();
     verificationCodeController.dispose();
+    super.dispose();
   }
 
   void notifyListeners() {

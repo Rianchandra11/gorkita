@@ -11,6 +11,8 @@ import 'package:uts_backend/repository/venue_repository.dart';
 import 'package:uts_backend/services/booking_service.dart';
 
 class ChooseBookingScheduleScreen extends StatefulWidget {
+  final int userId;
+  final String namaUser;
   final int venueId;
   final String jamOperasional;
   final String harga;
@@ -19,6 +21,8 @@ class ChooseBookingScheduleScreen extends StatefulWidget {
 
   const ChooseBookingScheduleScreen({
     super.key,
+    required this.userId,
+    required this.namaUser,
     required this.venueId,
     required this.jamOperasional,
     required this.harga,
@@ -349,7 +353,7 @@ class _ChooseBookingScheduleScreenState
 
   AppBar _buildAppBar() {
     return AppBar(
-      toolbarHeight: 140,
+      toolbarHeight: 160,
       leading: SizedBox.shrink(),
       backgroundColor: Colors.white,
       flexibleSpace: Padding(
@@ -556,6 +560,8 @@ class _ChooseBookingScheduleScreenState
                           await BookingService.insert(
                             selectedSchedule,
                             selectedDate,
+                            widget.userId,
+                            widget.namaUser,
                             widget.venueId,
                             widget.namaVenue,
                           );

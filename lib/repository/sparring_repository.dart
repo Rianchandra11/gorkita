@@ -2,11 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:uts_backend/model/sparring_model.dart';
 
 class SparringRepository {
-  static Future<List<SparringModel>> getOpenMatches() async {
-    List<SparringModel> data = [];
+  static Stream<List<SparringModel>> getOpenMatches() {
+  
     FirebaseFirestore db = FirebaseFirestore.instance;
-    try {
-      final result = await db
+    return db
           .collection("sparrings")
           .withConverter(
             fromFirestore: SparringModel.fromFirestore,
@@ -14,15 +13,9 @@ class SparringRepository {
                 sparring.toFirestore(),
           )
           .where("status", isEqualTo: "open")
-          .get();
+          .snapshots().map((snapshot) => snapshot.docs.map((doc) => doc.data()).toList());
 
-      for (var doc in result.docs) {
-        data.add(doc.data());
-      }
-      return data;
-    } catch (e) {
-      rethrow;
-    }
+      
   }
 
   static Future<List<SparringModel>> getClosedMatches() async {

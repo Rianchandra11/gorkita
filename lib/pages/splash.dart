@@ -4,7 +4,7 @@ import 'package:uts_backend/pages/login/login_page.dart';
 // import 'package:uts_backend/pages/login/login_page.dart';
 import 'package:uts_backend/pages/register/register_page.dart' as register_new;
 import 'package:uts_backend/pages/home.dart';
-import 'package:uts_backend/pages/login/login_page.dart';
+
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});

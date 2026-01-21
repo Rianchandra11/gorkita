@@ -1,4 +1,6 @@
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:uts_backend/helper/fasilitas_icon.dart';
 import 'package:uts_backend/helper/number_formatter.dart';
@@ -266,13 +268,24 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
             ],
           ),
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
+              final currentUser = FirebaseAuth.instance.currentUser;
+              final temp = await FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(currentUser!.uid)
+                  .get();
+              final id = temp.data()?["user_id"];
+              print("id coba: ${id}");
+              final nama = temp.data()?["name"];
+              print("nama : ${nama}");
               Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => ChooseBookingScheduleScreen(
                     venueId: data!.venueId!,
                     jamOperasional: data!.jamOperasional!,
+                    userId: id,
+                    namaUser: nama,
                     harga: "${data!.harga!}",
                     jumlahLapangan: data!.jumlahLapangan!,
                     namaVenue: data!.nama!,

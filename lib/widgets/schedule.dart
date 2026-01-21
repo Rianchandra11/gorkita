@@ -18,6 +18,16 @@ class Schedule extends StatefulWidget {
 
 class _ScheduleState extends State<Schedule> {
   bool _hasData = false;
+  late Stream<List<BookingModel>> _bookingStream;
+
+  @override
+  void initState() {
+    super.initState();
+    _bookingStream = UserRepository.getBookingScheduleStream(widget.userId);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<BookingReminderProvider>().handlerOnAppStart(widget.userId);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,9 +45,10 @@ class _ScheduleState extends State<Schedule> {
           ),
           child: Padding(
             padding: const EdgeInsets.all(16),
-            child: FutureBuilder(
-              future: UserRepository.getBookingSchedule(widget.userId),
+            child: StreamBuilder(
+              stream: _bookingStream,
               builder: (context, asyncSnapshot) {
+                print("apa ini : ${asyncSnapshot.data}");
                 if (asyncSnapshot.connectionState == ConnectionState.waiting) {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -49,7 +60,9 @@ class _ScheduleState extends State<Schedule> {
                   );
                 }
 
-                if (asyncSnapshot.hasError || asyncSnapshot.data == null) {
+                if (asyncSnapshot.hasError ||
+                    asyncSnapshot.data == null ||
+                    asyncSnapshot.data!.isEmpty) {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -93,25 +106,6 @@ class _ScheduleState extends State<Schedule> {
             color: isDark ? Colors.white : Colors.black,
           ),
         ),
-        if (!isLoading && _hasData)
-          TextButton(
-            onPressed: () {},
-            style: TextButton.styleFrom(
-              padding: EdgeInsets.zero,
-              minimumSize: Size.zero,
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-            child: Text(
-              "Lihat Semua",
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: isDark
-                    ? const Color.fromRGBO(167, 227, 172, 1)
-                    : const Color.fromRGBO(21, 116, 42, 1),
-              ),
-            ),
-          ),
       ],
     );
   }

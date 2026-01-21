@@ -158,6 +158,7 @@ class _MyAppState extends State<MyApp> {
       navigatorObservers: [
         FirebaseAnalyticsObserver(analytics: widget.analytics),
       ],
+      home: SplashScreen(),
     );
   }
 }

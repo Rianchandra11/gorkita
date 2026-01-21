@@ -1,9 +1,11 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:uts_backend/helper/number_formatter.dart';
 import 'package:uts_backend/model/venue_model.dart';
 import 'package:uts_backend/pages/venue_detail_screen.dart';
 import 'package:uts_backend/repository/venue_repository.dart';
+import 'package:uts_backend/providers/theme_provider.dart';
 
 class VenueListScreen extends StatefulWidget {
   const VenueListScreen({super.key});
@@ -46,8 +48,8 @@ class _VenueListScreenState extends State<VenueListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    bool isDark = Provider.of<ThemeProvider>(context).isDarkMode;
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Color.fromRGBO(21, 116, 42, 1),
         elevation: 0,
@@ -66,10 +68,14 @@ class _VenueListScreenState extends State<VenueListScreen> {
           preferredSize: const Size.fromHeight(70),
           child: Container(
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: isDark
+                  ? const Color(0xFF1E1E1E)
+                  : Colors.white,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.1),
+                  color: isDark
+                      ? Colors.black.withValues(alpha: 0.1)
+                      : Colors.white.withValues(alpha: 0.1),
                   blurRadius: 6,
                   offset: const Offset(0, 3),
                 ),
@@ -121,8 +127,9 @@ class _VenueListScreenState extends State<VenueListScreen> {
   }
 
   Widget _buildSearchBar() {
+    bool isDark = Provider.of<ThemeProvider>(context).isDarkMode;
     return Container(
-      color: Colors.white,
+      color: isDark ? Colors.black : Colors.white,
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
       child: Row(
         children: [

@@ -3,6 +3,23 @@ import 'package:uts_backend/model/booking_model.dart';
 import 'package:uts_backend/model/user_model.dart';
 
 class UserRepository {
+  static Stream<List<BookingModel>> getBookingScheduleStream(int id) {
+  FirebaseFirestore db = FirebaseFirestore.instance;
+
+  return db
+      .collection("bookings")
+      .withConverter(
+        fromFirestore: BookingModel.fromFirestore,
+        toFirestore: (BookingModel booking, _) => booking.toFirestore(),
+      )
+      .where("penyewa.user_id", isEqualTo: id)
+      .where(
+        "jam_mulai",
+        isGreaterThanOrEqualTo: Timestamp.fromDate(DateTime.now()),
+      )
+      .snapshots() 
+      .map((snapshot) => snapshot.docs.map((doc) => doc.data()).toList());
+}
   static Future<List<BookingModel>?> getBookingSchedule(int id) async {
     FirebaseFirestore db = FirebaseFirestore.instance;
 

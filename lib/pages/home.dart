@@ -1,10 +1,12 @@
 import 'package:awesome_notifications/awesome_notifications.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart' as geo;
-
+import 'package:uts_backend/model/booking_model.dart';
 import 'package:uts_backend/model/venue_model.dart';
 import 'package:uts_backend/pages/profil.dart';
+import 'package:uts_backend/pages/sparring_page.dart';
 import 'package:uts_backend/pages/venue_list_screen.dart';
 import 'package:uts_backend/pages/venue_location_screen.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -24,12 +26,7 @@ import 'package:uts_backend/widgets/venue_card.dart';
 import 'package:provider/provider.dart';
 import 'package:uts_backend/providers/theme_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
-
 import 'dart:async';
-import 'package:skeletonizer/skeletonizer.dart';
-import 'package:provider/provider.dart';  
-import 'package:uts_backend/database/providers/theme_provider.dart'; 
-import 'package:uts_backend/widgets/ad_banner.dart'; 
 
 class HomeScreen extends StatefulWidget {
   final int id;
@@ -46,9 +43,11 @@ class _HomeScreenState extends State<HomeScreen> {
   List<VenueModel> _venueLocation = [];
   bool locationGranted = false;
   String apaaja = '';
+  late Stream<QuerySnapshot<BookingModel>> bookedScheduleStream;
   StreamSubscription<geo.ServiceStatus>? _serviceStatusStreamSubscription;
 
   List<dynamic> venuesLocation = [];
+
   Widget _buildVenuePermissionLocation(bool isDark) {
     return Column(
       children: [
@@ -65,7 +64,7 @@ class _HomeScreenState extends State<HomeScreen> {
           onPressed: () {
             getLocationUser();
           },
-          
+
           style: ElevatedButton.styleFrom(
             backgroundColor: isDark ? Colors.grey[850] : Colors.white54,
             foregroundColor: isDark ? Colors.white : Colors.black87,
@@ -145,7 +144,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void initState() {
-    
+    print('userid: ${widget.id}');
     AwesomeNotifications().isNotificationAllowed().then((isAllowed) {
       if (!isAllowed) {
         // This is just a basic example. For real apps, you must show some
@@ -174,14 +173,10 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _listenToGpsStatus() async {
-    
     _serviceStatusStreamSubscription = geo.Geolocator.getServiceStatusStream()
-        .listen((geo.ServiceStatus status) async{
-          
+        .listen((geo.ServiceStatus status) async {
           if (status == geo.ServiceStatus.enabled) {
-          
             print("GPS Aktif");
-            
           } else {
             print("GPS Mati");
             AwesomeNotifications().cancel(10);
@@ -224,8 +219,6 @@ class _HomeScreenState extends State<HomeScreen> {
       openAppSettings();
     }
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -336,7 +329,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                           ),
 
-                          Schedule(isDark: isDark, userId: 22),
+                          Schedule(isDark: isDark, userId: widget.id),
 
                           Card(
                             color: isDark ? Colors.grey[850] : Colors.white,
@@ -366,7 +359,15 @@ class _HomeScreenState extends State<HomeScreen> {
                                       QuickMenuItem(
                                         icon: Icons.scoreboard_rounded,
                                         name: "Sparring",
-                                        onTap: () {},
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  SparringPage(),
+                                            ),
+                                          );
+                                        },
                                       ),
                                       QuickMenuItem(
                                         icon: Icons.groups,
@@ -415,8 +416,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 const SizedBox(height: 18),
 
                 // --- SPARRING SECTION ---
-                FutureBuilder(
-                  future: SparringRepository.getOpenMatches(),
+                StreamBuilder(
+                  stream: SparringRepository.getOpenMatches(),
                   builder: (context, asyncSnapshot) {
                     if (asyncSnapshot.connectionState ==
                         ConnectionState.waiting) {

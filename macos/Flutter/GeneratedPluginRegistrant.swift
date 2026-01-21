@@ -7,12 +7,10 @@ import Foundation
 
 import awesome_notifications
 import cloud_firestore
-
 import file_selector_macos
 import firebase_analytics
 import firebase_auth
 import firebase_core
-
 import flutter_local_notifications
 import flutter_localization
 import geolocator_apple

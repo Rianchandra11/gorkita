@@ -41,6 +41,8 @@ class BookingService {
   static Future<void> insert(
     List selectedSchedule,
     DateTime selectedDate,
+    int userId,
+    String namaUser,
     int venueId,
     String namaVenue,
   ) async {
@@ -60,8 +62,8 @@ class BookingService {
         await VenueRepository.insertBooking(
           venueId,
           namaVenue,
-          22,
-          "Alvin",
+          userId,
+          namaUser,
           lapangan,
           jamMulai,
         );
