@@ -12,7 +12,9 @@ import 'package:uts_backend/providers/auth_provider.dart';
 import 'package:uts_backend/providers/theme_provider.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
-
+import 'package:uts_backend/helper/notification_helper.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:uts_backend/widgets/ad_interstitial.dart'; 
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -71,7 +73,15 @@ Future<void> main() async {
     if (kDebugMode) debugPrint('Error with Firebase: $e');
   }
 
-  // Inisialisasi Analytics
+  await NotificationHelper.init();
+  print('NotificationHelper initialized');
+
+  await MobileAds.instance.initialize();
+  print('Google Mobile Ads (AdMob) initialized');
+
+  InterstitialHelper.loadAd();
+  print('Interstitial Ad preloaded');
+
   final FirebaseAnalytics analytics = FirebaseAnalytics.instance;
 
   try {
@@ -125,7 +135,6 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    // Ambil provider tema
     final themeProvider = Provider.of<ThemeProvider>(context);
 
     return MaterialApp(
@@ -149,27 +158,6 @@ class _MyAppState extends State<MyApp> {
       navigatorObservers: [
         FirebaseAnalyticsObserver(analytics: widget.analytics),
       ],
-      // onGenerateRoute: (settings) {
-      //   switch (settings.name) {
-      //     case '/':
-      //       return MaterialPageRoute(builder: (context) => HomeScreen(id: 0));
-
-      //     case '/notification_screen':
-      //       return MaterialPageRoute(
-      //         builder: (context) {
-      //           return NotificationScreen();
-      //         },
-      //       );
-      //     case '/profil':
-      //       return MaterialPageRoute(builder: (context) {
-      //         return Profil(id: id)
-      //       },
-      //     default:
-      //       assert(false, 'Page ${settings.name} not found');
-      //       return null;
-      //   }
-      // },
-      home: SplashScreen(),
     );
   }
 }

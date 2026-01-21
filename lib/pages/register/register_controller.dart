@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:uts_backend/services/app_service.dart';
-import 'package:uts_backend/pages/login/login_page.dart';
+import 'package:uts_backend/pages/login/login_page/login_page.dart';
+import 'package:uts_backend/helper/notification_helper.dart'; 
+import 'package:uts_backend/widgets/ad_interstitial.dart'; 
 
-class RegisterController {
-  // Controllers
+class RegisterController with ChangeNotifier {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
@@ -22,19 +23,17 @@ class RegisterController {
   // API Service
   final AppService apiService = AppService();
 
-  // Colors
   final Color primary = const Color(0xFF4CAF50);
   final Color secondary = const Color(0xFF2196F3);
   final Color subtle = const Color(0xFF648765);
   final Color inputBg = const Color(0xFFF0F4F0);
 
-  // Handle Methods
+  bool get obscurePassword => _obscurePassword;
+  bool get obscureConfirmPassword => _obscureConfirmPassword;
+  bool get isLoading => _isLoading;
+
   void handleBackPressed(BuildContext context) {
-    if (showVerificationField) {
-      showVerificationField = false;
-    } else {
-      navigateToLogin(context);
-    }
+    Navigator.pop(context);
   }
 
   void navigateToLogin(BuildContext context) {
@@ -47,7 +46,7 @@ class RegisterController {
   Future<void> handleRegister(BuildContext context) async {
     if (!validateRegistrationInput(context)) return;
 
-    isLoading = true;
+    _isLoading = true;
     notifyListeners();
 
     try {
@@ -78,9 +77,9 @@ class RegisterController {
       }
 
       final result = await apiService.hybridRegister({
-        'name': nameController.text,
-        'email': emailController.text,
-        'phone': phoneController.text,
+        'name': nameController.text.trim(),
+        'email': emailController.text.trim(),
+        'phone': phoneController.text.trim(),
         'password': passwordController.text,
         'level_skill': 'Beginner',
       });
@@ -130,17 +129,14 @@ class RegisterController {
     }
   }
 
-  Future<void> resendCode(BuildContext context) async {
-    showMessage(context, 'Kode verifikasi baru telah dikirim', Colors.green);
-  }
-
-  // Validation Methods
   bool validateRegistrationInput(BuildContext context) {
-    if (nameController.text.isEmpty ||
-        emailController.text.isEmpty ||
-        phoneController.text.isEmpty ||
-        passwordController.text.isEmpty ||
-        confirmPasswordController.text.isEmpty) {
+    final name = nameController.text.trim();
+    final email = emailController.text.trim();
+    final phone = phoneController.text.trim();
+    final password = passwordController.text;
+    final confirmPassword = confirmPasswordController.text;
+
+    if (name.isEmpty || email.isEmpty || phone.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
       showMessage(context, 'Semua field harus diisi', Colors.red);
       return false;
     }
@@ -151,12 +147,12 @@ class RegisterController {
       return false;
     }
 
-    if (passwordController.text != confirmPasswordController.text) {
-      showMessage(context, 'Password tidak cocok', Colors.red);
+    if (phone.length < 10) {
+      showMessage(context, 'Nomor telepon minimal 10 digit', Colors.red);
       return false;
     }
 
-    if (passwordController.text.length < 6) {
+    if (password.length < 6) {
       showMessage(context, 'Password minimal 6 karakter', Colors.red);
       return false;
     }
@@ -170,6 +166,7 @@ class RegisterController {
       showMessage(context, 'Masukkan 6 digit kode verifikasi', Colors.red);
       return false;
     }
+
     return true;
   }
 
@@ -199,15 +196,16 @@ class RegisterController {
   }
 
   void togglePasswordVisibility() {
-    obscurePassword = !obscurePassword;
+    _obscurePassword = !_obscurePassword;
     notifyListeners();
   }
 
   void toggleConfirmPasswordVisibility() {
-    obscureConfirmPassword = !obscureConfirmPassword;
+    _obscureConfirmPassword = !_obscureConfirmPassword;
     notifyListeners();
   }
 
+  @override
   void dispose() {
     nameController.dispose();
     emailController.dispose();

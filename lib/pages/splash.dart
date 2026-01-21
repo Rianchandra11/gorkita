@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:uts_backend/pages/login/login_page.dart';
+// import 'package:uts_backend/pages/login/login_page.dart';
 import 'package:uts_backend/pages/register/register_page.dart' as register_new;
 import 'package:uts_backend/pages/home.dart';
 import 'package:uts_backend/pages/login/login_page.dart';
@@ -221,7 +223,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const LoginPage(),
+                            builder: (context) => LoginPage(),
                           ),
                         );
                       },
