@@ -6,7 +6,11 @@ import 'package:uts_backend/pages/venue_detail_screen.dart';
 import 'package:uts_backend/repository/venue_repository.dart';
 
 class VenueListScreen extends StatefulWidget {
-  const VenueListScreen({super.key});
+  final Future<List<VenueModel>> Function()? fetchVenues;
+  final Future<VenueModel> Function(int)? fetchDetails;
+  final ScrollController? scrollController;
+
+  const VenueListScreen({Key? key, this.fetchVenues, this.fetchDetails, this.scrollController}) : super(key: key);
 
   @override
   State<VenueListScreen> createState() => _VenueListScreenState();
@@ -15,12 +19,15 @@ class VenueListScreen extends StatefulWidget {
 class _VenueListScreenState extends State<VenueListScreen> {
   List<VenueModel> initList = [];
   List<VenueModel> listVenue = [];
+  bool isLoading = true;
   TextEditingController search = TextEditingController();
 
   getData() async {
-    initList = await VenueRepository.get();
+    final fetch = widget.fetchVenues ?? VenueRepository.get;
+    initList = await fetch();
     setState(() {
       listVenue = initList;
+      isLoading = false;
     });
   }
 
@@ -79,7 +86,7 @@ class _VenueListScreenState extends State<VenueListScreen> {
           ),
         ),
       ),
-      body: initList.isEmpty
+      body: isLoading
           ? Center(child: CircularProgressIndicator())
           : listVenue.isEmpty
           ? Center(child: Text("Pencarian Anda tidak ditemukan"))
@@ -107,6 +114,7 @@ class _VenueListScreenState extends State<VenueListScreen> {
                 ),
                 Expanded(
                   child: ListView.builder(
+                    controller: widget.scrollController,
                     padding: const EdgeInsets.only(top: 8.0),
                     itemCount: listVenue.length,
                     itemBuilder: (context, index) {
@@ -159,7 +167,11 @@ class _VenueListScreenState extends State<VenueListScreen> {
       onTap: () {
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) => VenueDetailScreen(id: venue.venueId!),
+            settings: RouteSettings(arguments: venue.venueId),
+            builder: (context) => VenueDetailScreen(
+              id: venue.venueId!,
+              fetchDetails: widget.fetchDetails,
+            ),
           ),
         );
       },

@@ -8,7 +8,9 @@ import 'package:uts_backend/repository/venue_repository.dart';
 
 class VenueDetailScreen extends StatefulWidget {
   final int id;
-  const VenueDetailScreen({super.key, required this.id});
+  final Future<VenueModel> Function(int)? fetchDetails;
+  final void Function(BuildContext, VenueModel)? onBooking;
+  const VenueDetailScreen({super.key, required this.id, this.fetchDetails, this.onBooking});
 
   @override
   State<VenueDetailScreen> createState() => _VenueDetailScreenState();
@@ -18,7 +20,8 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
   VenueModel? data;
 
   getData() async {
-    data = await VenueRepository.getDetails(widget.id);
+    final fetch = widget.fetchDetails ?? VenueRepository.getDetails;
+    data = await fetch(widget.id);
     setState(() {});
   }
 
@@ -265,8 +268,12 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
               ),
             ],
           ),
-          ElevatedButton(
+                  ElevatedButton(
             onPressed: () {
+              if (widget.onBooking != null) {
+                widget.onBooking!(context, data!);
+                return;
+              }
               Navigator.push(
                 context,
                 MaterialPageRoute(
