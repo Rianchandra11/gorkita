@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:uts_backend/database/services/data_service.dart';
+import 'package:uts_backend/services/data_service.dart';
 import 'auth_service.dart';
 
 class HybridService {

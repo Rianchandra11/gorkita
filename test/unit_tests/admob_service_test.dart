@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:uts_backend/database/services/admob_service.dart';
+import 'package:uts_backend/services/admob_service.dart';
 
 // Mock untuk Google Mobile Ads
 class MockRewardedAd extends Mock implements RewardedAd {}

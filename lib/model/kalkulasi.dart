@@ -1,4 +1,4 @@
-import 'package:uts_backend/database/services/reward_service.dart';
+import 'package:uts_backend/services/reward_service.dart';
 
 /// Model untuk hasil kalkulasi hadiah
 class PrizeCalculation {

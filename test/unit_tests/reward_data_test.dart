@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:uts_backend/database/services/reward_service.dart';
+import 'package:uts_backend/services/reward_service.dart';
 
 void main() {
   group('RewardData - Kelayakan Kupon', () {

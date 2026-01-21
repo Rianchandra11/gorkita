@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'package:marquee/marquee.dart';
 import '../widgets/reward_progress_widget.dart';
-import '../database/services/reward_service.dart';
-import '../database/services/admob_service.dart';
+import 'package:uts_backend/services/reward_service.dart';
+import 'package:uts_backend/services/admob_service.dart';
 
 class RewardPage extends StatefulWidget {
   final int userId;

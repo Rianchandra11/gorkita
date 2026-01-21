@@ -1,16 +1,15 @@
 import 'package:flutter/foundation.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
-import 'package:uts_backend/database/firebase_option.dart';
+import 'package:uts_backend/helper/firebase_option.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:uts_backend/controllers/notification_controller.dart';
+import 'package:uts_backend/pages/splash.dart';
 import 'package:uts_backend/providers/booking_reminder_provider.dart';
 import 'package:uts_backend/providers/unread_notification_provider.dart';
-import 'package:uts_backend/pages/home.dart';
-import 'package:uts_backend/pages/notification_screen.dart';
-import 'package:uts_backend/database/providers/provider.dart';
-import 'package:uts_backend/database/providers/theme_provider.dart';
+import 'package:uts_backend/providers/auth_provider.dart';
+import 'package:uts_backend/providers/theme_provider.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 
@@ -81,16 +80,12 @@ Future<void> main() async {
   } catch (e) {
     if (kDebugMode) debugPrint('Error initializing date formatting: $e');
   } 
-
-  try {
-    final authProvider = AuthProvider();
-    await authProvider.initialize();
-    if (kDebugMode) debugPrint('AuthProvider initialized');
-
+  final authProvider = AuthProvider();
+  await authProvider.initialize();
     runApp(
       MultiProvider(
         providers: [
-          ChangeNotifierProvider<AuthProvider>.value(value: authProvider),
+          ChangeNotifierProvider<AuthProvider>(create:(_) => authProvider),
           ChangeNotifierProvider<ThemeProvider>(create: (_) => ThemeProvider()),
           ChangeNotifierProvider(create: (_) => UnreadNotificationProvider()),
           ChangeNotifierProvider(create: (_) => BookingReminderProvider()),
@@ -98,17 +93,6 @@ Future<void> main() async {
         child: MyApp(analytics: analytics),
       ),
     );
-  } catch (e) {
-    if (kDebugMode) debugPrint('Error initializing AuthProvider: $e');
-    runApp(
-      MultiProvider(
-        providers: [
-          ChangeNotifierProvider<ThemeProvider>(create: (_) => ThemeProvider()),
-        ],
-        child: MyApp(analytics: analytics),
-      ),
-    );
-  }
 }
 
 class MyApp extends StatefulWidget {
@@ -165,24 +149,27 @@ class _MyAppState extends State<MyApp> {
       navigatorObservers: [
         FirebaseAnalyticsObserver(analytics: widget.analytics),
       ],
-      onGenerateRoute: (settings) {
-        switch (settings.name) {
-          case '/':
-            return MaterialPageRoute(builder: (context) => HomeScreen(id: 0));
+      // onGenerateRoute: (settings) {
+      //   switch (settings.name) {
+      //     case '/':
+      //       return MaterialPageRoute(builder: (context) => HomeScreen(id: 0));
 
-          case '/notification_screen':
-            return MaterialPageRoute(
-              builder: (context) {
-                return NotificationScreen();
-              },
-            );
-
-          default:
-            assert(false, 'Page ${settings.name} not found');
-            return null;
-        }
-      },
-      // home: HomeScreen(id: 0),
+      //     case '/notification_screen':
+      //       return MaterialPageRoute(
+      //         builder: (context) {
+      //           return NotificationScreen();
+      //         },
+      //       );
+      //     case '/profil':
+      //       return MaterialPageRoute(builder: (context) {
+      //         return Profil(id: id)
+      //       },
+      //     default:
+      //       assert(false, 'Page ${settings.name} not found');
+      //       return null;
+      //   }
+      // },
+      home: SplashScreen(),
     );
   }
 }

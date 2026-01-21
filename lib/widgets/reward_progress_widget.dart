@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import '../database/services/reward_service.dart';
-import '../database/services/admob_service.dart';
+import 'package:uts_backend/services/reward_service.dart';
+import 'package:uts_backend/services/admob_service.dart';
 import '../pages/kupon_saya_page.dart';
 
 class RewardProgressWidget extends StatefulWidget {

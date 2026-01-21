@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:uts_backend/pages/reset_password.dart';
-import 'package:uts_backend/database/services/app_service.dart';
+import 'package:uts_backend/services/app_service.dart';
 
 // Fake AppService untuk mencegah inisialisasi Firebase saat widget test
 class FakeAppService implements AppService {

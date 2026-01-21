@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import 'package:uts_backend/database/models/diskon_kalkulasi.dart';
-import 'package:uts_backend/database/models/kalkulasi.dart';
-import '../database/services/reward_service.dart';
+import 'package:uts_backend/model/diskon_kalkulasi.dart';
+import 'package:uts_backend/model/kalkulasi.dart';
+import 'package:uts_backend/services/reward_service.dart';
 
 /// Helper class untuk menggunakan hadiah (diskon/cashback) di booking
 class DiscountHelper {

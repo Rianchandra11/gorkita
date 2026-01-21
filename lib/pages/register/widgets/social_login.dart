@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import 'package:uts_backend/database/services/account_manager.dart';
+import 'package:uts_backend/services/account_manager.dart';
 import '../register_controller.dart';
 
 class SocialLogin extends StatefulWidget {

@@ -2,7 +2,7 @@ import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart' as geo;
-import 'package:uts_backend/database/database_service.dart';
+
 import 'package:uts_backend/model/venue_model.dart';
 import 'package:uts_backend/pages/profil.dart';
 import 'package:uts_backend/pages/venue_list_screen.dart';
@@ -22,7 +22,7 @@ import 'package:uts_backend/widgets/schedule.dart';
 import 'package:uts_backend/widgets/sparring_card.dart';
 import 'package:uts_backend/widgets/venue_card.dart';
 import 'package:provider/provider.dart';
-import 'package:uts_backend/database/providers/theme_provider.dart';
+import 'package:uts_backend/providers/theme_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import 'dart:async';
@@ -39,7 +39,6 @@ class _HomeScreenState extends State<HomeScreen> {
   TextEditingController searchInput = TextEditingController();
   int currentPage = 0;
   bool notif = false;
-  final ApiService _apiService = ApiService();
   List<VenueModel> _venueLocation = [];
   bool locationGranted = false;
   String apaaja = '';
@@ -222,19 +221,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
- 
-  getNotifData() async {
-    try {
-      final result = await _apiService.getNotifications();
-      notif =
-          result['success'] == true &&
-          result['data'] != null &&
-          result['data'].isNotEmpty;
-      setState(() {});
-    } catch (e) {
-      print('Error getting notifications: $e');
-    }
-  }
+
 
   @override
   Widget build(BuildContext context) {

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:uts_backend/database/models/user_coupon.dart';
-import '../database/services/coupon_service.dart';
-import '../database/services/reward_service.dart';
+import 'package:uts_backend/model/user_coupon.dart';
+import 'package:uts_backend/services/coupon_service.dart';
+import 'package:uts_backend/services/reward_service.dart';
 
 /// Halaman untuk melihat semua kupon yang dimiliki user
 class KuponSayaPage extends StatefulWidget {

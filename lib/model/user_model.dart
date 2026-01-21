@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-
 class UserModel {
   final String uid;
   final int userId;
@@ -32,31 +31,34 @@ class UserModel {
   })  : socialUid = socialUid ?? [],
         createdAt = createdAt ?? DateTime.now(),
         updatedAt = updatedAt ?? DateTime.now();
-
-  factory UserModel.fromMap(Map<String, dynamic> map) {
+  factory UserModel.fromFirestore(
+    DocumentSnapshot<Map<String, dynamic>> snapshot,
+    SnapshotOptions? options,
+  ) {
+    final data = snapshot.data();
     return UserModel(
-      uid: map['uid'] ?? '',
-      userId: map['user_id'] ?? 0,
-      name: map['name'] ?? '',
-      email: map['email'] ?? '',
-      phone: map['phone'] ?? '',
-      levelSkill: map['level_skill'] ?? 'Beginner',
-      loginMethod: map['login_method'] ?? 'email',
-      balance: (map['balance'] ?? 0).toDouble(),
-      password: map['password'] ?? '',
-      photoUrl: map['photo_url'],
-      socialUid: List<String>.from(map['social_uid'] ?? []),
-      createdAt: map['createdAt'] is Timestamp
-          ? (map['createdAt'] as Timestamp).toDate()
-          : DateTime.parse(map['createdAt']?.toString() ?? DateTime.now().toString()),
-      updatedAt: map['updatedAt'] is Timestamp
-          ? (map['updatedAt'] as Timestamp).toDate()
-          : DateTime.parse(map['updatedAt']?.toString() ?? DateTime.now().toString()),
+      uid: snapshot.id,
+      userId: data?['user_id'] ?? 0,
+      name: data?['name'] ?? '',
+      email: data?['email'] ?? '',
+      phone: data?['phone'] ?? '',
+      levelSkill: data?['level_skill'] ?? 'Beginner',
+      loginMethod: data?['login_method'] ?? 'email',
+      balance: (data?['balance'] ?? 0).toDouble(),
+      password: data?['password'] ?? '',
+      photoUrl: data?['photo_url'],
+      socialUid: List<String>.from(data?['social_uid'] ?? []),
+      createdAt: data?['createdAt'] is Timestamp
+          ? (data?['createdAt'] as Timestamp).toDate()
+          : DateTime.parse(data?['createdAt']?.toString() ?? DateTime.now().toString()),
+      updatedAt: data?['updatedAt'] is Timestamp
+          ? (data?['updatedAt'] as Timestamp).toDate()
+          : DateTime.parse(data?['updatedAt']?.toString() ?? DateTime.now().toString()),
     );
   }
-
-  Map<String, dynamic> toMap() {
-    return {
+  
+  Map<String, dynamic> toFirestore() {
+   return {
       'uid': uid,
       'user_id': userId,
       'name': name,
@@ -72,4 +74,5 @@ class UserModel {
       'updatedAt': updatedAt,
     };
   }
+
 }

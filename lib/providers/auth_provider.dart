@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../database/services/account_manager.dart';
+import 'package:uts_backend/services/account_manager.dart';
 
 /// AuthProvider - Optimized state management untuk authentication
 /// Clean, fast, tanpa cache berlebihan

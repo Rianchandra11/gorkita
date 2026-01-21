@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:uts_backend/model/booking_model.dart';
-
+import 'package:uts_backend/model/user_model.dart';
 
 class UserRepository {
   static Future<List<BookingModel>?> getBookingSchedule(int id) async {
@@ -76,4 +76,19 @@ class UserRepository {
       return null;
     }
   }
+
+ static Future<List<UserModel>> getAllUser() async {
+  final FirebaseFirestore db = FirebaseFirestore.instance;
+
+  final snapshot = await db
+      .collection('users')
+      .withConverter<UserModel>(
+        fromFirestore: UserModel.fromFirestore,
+        toFirestore: (user, _) => user.toFirestore(),
+      )
+      .get();
+
+  return snapshot.docs.map((doc) => doc.data()).toList();
+}
+
 }

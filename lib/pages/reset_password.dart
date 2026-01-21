@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import 'package:uts_backend/database/services/app_service.dart';
+import 'package:uts_backend/services/app_service.dart';
 import 'package:uts_backend/pages/login/login_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 

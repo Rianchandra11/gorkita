@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import 'package:uts_backend/database/services/account_manager.dart';
-import 'package:uts_backend/database/services/coupon_service.dart';
-import 'package:uts_backend/database/services/reward_service.dart';
+import 'package:uts_backend/services/account_manager.dart';
+import 'package:uts_backend/services/coupon_service.dart';
+import 'package:uts_backend/services/reward_service.dart';
 import 'package:uts_backend/providers/auth_provider.dart';
-import 'package:uts_backend/pages/forget password.dart';
+import 'package:uts_backend/pages/forget_password.dart';
 import 'package:uts_backend/pages/kupon_saya_page.dart';
 import 'package:uts_backend/pages/login/login_page.dart';
 import 'package:uts_backend/pages/reward_page.dart';
-import 'package:uts_backend/widgets/aktivitypage.dart';
 import 'package:uts_backend/widgets/phone_input_field.dart';
 import 'package:uts_backend/widgets/skeleton_loader.dart';
 import 'package:provider/provider.dart';
@@ -28,7 +27,7 @@ class Profil extends StatefulWidget {
 }
 
 class _ProfilState extends State<Profil> {
-  // Optimized: Use AccountManager directly
+
   final AccountManager _accountManager = AccountManager();
   
   String? name;
@@ -1016,7 +1015,8 @@ class _ProfilState extends State<Profil> {
 
   @override
   Widget build(BuildContext context) {
-    final authProvider = Provider.of<AuthProvider>(context);
+    final authProvider = context.watch<AuthProvider>();
+
     final themeProvider = Provider.of<ThemeProvider>(context);
 
     if (_isLoading) {
@@ -1321,61 +1321,7 @@ class _ProfilState extends State<Profil> {
                         return SizedBox.shrink();
                       },
                     ),
-
-                    SizedBox(height: 16),
-
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ActivityPage(),
-                          ),
-                        );
-                      },
-                      child: Container(
-                        margin: EdgeInsets.symmetric(horizontal: 16),
-                        padding: EdgeInsets.symmetric(
-                          vertical: 16,
-                          horizontal: 16,
-                        ),
-                        decoration: BoxDecoration(
-                          color: themeProvider.isDarkMode
-                              ? Colors.grey[850]
-                              : Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black12,
-                              blurRadius: 4,
-                              offset: Offset(0, 1),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'Aktivitas Saya',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: themeProvider.isDarkMode
-                                    ? Colors.white
-                                    : Colors.black87,
-                              ),
-                            ),
-                            Icon(
-                              Icons.arrow_forward_ios,
-                              size: 16,
-                              color: Colors.grey,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 24),
-
+                    SizedBox(height:10),
                     _sectionHeader('Info Pribadi', themeProvider),
                     Container(
                       margin: EdgeInsets.symmetric(horizontal: 16),

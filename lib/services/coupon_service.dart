@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:uts_backend/database/models/user_coupon.dart';
+import 'package:uts_backend/model/user_coupon.dart';
 import 'dart:math';
 import 'reward_service.dart';
 

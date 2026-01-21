@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:uts_backend/database/services/reward_service.dart';
+import 'package:uts_backend/services/reward_service.dart';
 
 
 class UserCoupon {
