@@ -16,6 +16,8 @@ class ChooseBookingScheduleScreen extends StatefulWidget {
   final String harga;
   final int jumlahLapangan;
   final String namaVenue;
+  final bool testMode;
+  final bool disableAds;
 
   const ChooseBookingScheduleScreen({
     super.key,
@@ -24,6 +26,8 @@ class ChooseBookingScheduleScreen extends StatefulWidget {
     required this.harga,
     required this.jumlahLapangan,
     required this.namaVenue,
+    this.testMode = false,
+    this.disableAds = false,
   });
 
   @override
@@ -93,6 +97,11 @@ class _ChooseBookingScheduleScreenState
   }
 
   void _initStream() {
+    if (widget.testMode) {
+      bookedScheduleStream = const Stream.empty();
+      return;
+    }
+
     bookedScheduleStream = VenueRepository.getBookedSchedule(
       widget.venueId,
       getStartScheduleTime(),
@@ -143,7 +152,9 @@ class _ChooseBookingScheduleScreenState
     jamTutup = int.parse(widget.jamOperasional.split(" - ")[1].substring(0, 2));
 
     _initStream();
-    _loadInterstitialAd();
+    if (!widget.disableAds) {
+      _loadInterstitialAd();
+    }
   }
 
   @override
@@ -154,19 +165,22 @@ class _ChooseBookingScheduleScreenState
         padding: const EdgeInsets.only(top: 8),
         child: ScrollConfiguration(
           behavior: const ScrollBehavior().copyWith(scrollbars: false),
-          child: StreamBuilder(
-            stream: bookedScheduleStream,
-            builder: (context, asyncSnapshot) {
-              if (asyncSnapshot.connectionState == ConnectionState.waiting) {
-                return Center(
-                  child: CircularProgressIndicator(
-                    color: Color.fromRGBO(21, 116, 42, 1),
-                  ),
-                );
-              }
-              return _buildScheduleTable(asyncSnapshot.data!.docs);
-            },
-          ),
+          child: widget.testMode
+              ? _buildScheduleTable(<QueryDocumentSnapshot<BookingModel>>[])
+              : StreamBuilder(
+                  stream: bookedScheduleStream,
+                  builder: (context, asyncSnapshot) {
+                    if (asyncSnapshot.connectionState ==
+                        ConnectionState.waiting) {
+                      return Center(
+                        child: CircularProgressIndicator(
+                          color: Color.fromRGBO(21, 116, 42, 1),
+                        ),
+                      );
+                    }
+                    return _buildScheduleTable(asyncSnapshot.data!.docs);
+                  },
+                ),
         ),
       ),
       bottomNavigationBar: _buildBookingBar(context),
@@ -348,6 +362,35 @@ class _ChooseBookingScheduleScreenState
   }
 
   AppBar _buildAppBar() {
+    if (widget.testMode) {
+      return AppBar(
+        backgroundColor: Colors.white,
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Pilih Jadwal', style: TextStyle(color: Colors.black)),
+            const SizedBox(height: 8),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: dateList
+                    .map(
+                      (e) => Padding(
+                        padding: const EdgeInsets.only(right: 10),
+                        child: Text(
+                          DateFormatter.format('dd', e),
+                          style: const TextStyle(color: Colors.black),
+                        ),
+                      ),
+                    )
+                    .toList(),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     return AppBar(
       toolbarHeight: 140,
       leading: SizedBox.shrink(),

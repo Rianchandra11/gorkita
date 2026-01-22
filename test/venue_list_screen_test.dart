@@ -112,43 +112,43 @@ void main() {
     expect(find.text('Loading Venue'), findsOneWidget);
   });
 
-  testWidgets('show empty result message when no venues matched with search filter', (
-    WidgetTester tester,
-  ) async {
-    final v1 = VenueModel(
-      venueId: 1,
-      nama: 'Alpha Arena',
-      kota: 'Jakarta',
-      harga: 40000,
-      totalRating: 5,
-      rating: 4.0,
-      linkGambar: ['https://example.com/a.jpg'],
-    );
-    final v2 = VenueModel(
-      venueId: 2,
-      nama: 'Beta Field',
-      kota: 'Bandung',
-      harga: 30000,
-      totalRating: 3,
-      rating: 3.5,
-      linkGambar: ['https://example.com/b.jpg'],
-    );
+  testWidgets(
+    'show empty result message when no venues matched with search filter',
+    (WidgetTester tester) async {
+      final v1 = VenueModel(
+        venueId: 1,
+        nama: 'Alpha Arena',
+        kota: 'Jakarta',
+        harga: 40000,
+        totalRating: 5,
+        rating: 4.0,
+        linkGambar: ['https://example.com/a.jpg'],
+      );
+      final v2 = VenueModel(
+        venueId: 2,
+        nama: 'Beta Field',
+        kota: 'Bandung',
+        harga: 30000,
+        totalRating: 3,
+        rating: 3.5,
+        linkGambar: ['https://example.com/b.jpg'],
+      );
 
-    await tester.pumpWidget(
-      MaterialApp(home: VenueListScreen(fetchVenues: () async => [v1, v2])),
-    );
+      await tester.pumpWidget(
+        MaterialApp(home: VenueListScreen(fetchVenues: () async => [v1, v2])),
+      );
 
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
 
-    // perform a search that matches no venues
-    await tester.enterText(find.byType(TextField), 'NoMatchQuery');
-    await tester.tap(find.byIcon(Icons.search));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
+      await tester.enterText(find.byType(TextField), 'NoMatchQuery');
+      await tester.tap(find.byIcon(Icons.search));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
 
-    expect(find.text('Pencarian Anda tidak ditemukan'), findsOneWidget);
-  });
+      expect(find.text('Pencarian Anda tidak ditemukan'), findsOneWidget);
+    },
+  );
 
   testWidgets('search clear restores full list', (WidgetTester tester) async {
     final v1 = VenueModel(
