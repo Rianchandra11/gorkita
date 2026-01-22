@@ -112,13 +112,38 @@ void main() {
     expect(find.text('Loading Venue'), findsOneWidget);
   });
 
-  testWidgets('shows empty result message when no venues', (
+  testWidgets('show empty result message when no venues matched with search filter', (
     WidgetTester tester,
   ) async {
-    await tester.pumpWidget(
-      MaterialApp(home: VenueListScreen(fetchVenues: () async => [])),
+    final v1 = VenueModel(
+      venueId: 1,
+      nama: 'Alpha Arena',
+      kota: 'Jakarta',
+      harga: 40000,
+      totalRating: 5,
+      rating: 4.0,
+      linkGambar: ['https://example.com/a.jpg'],
+    );
+    final v2 = VenueModel(
+      venueId: 2,
+      nama: 'Beta Field',
+      kota: 'Bandung',
+      harga: 30000,
+      totalRating: 3,
+      rating: 3.5,
+      linkGambar: ['https://example.com/b.jpg'],
     );
 
+    await tester.pumpWidget(
+      MaterialApp(home: VenueListScreen(fetchVenues: () async => [v1, v2])),
+    );
+
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    // perform a search that matches no venues
+    await tester.enterText(find.byType(TextField), 'NoMatchQuery');
+    await tester.tap(find.byIcon(Icons.search));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
 
