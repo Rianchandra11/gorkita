@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:uts_backend/helper/number_formatter.dart';
 import 'package:uts_backend/model/venue_model.dart';
 import 'package:uts_backend/pages/venue_detail_screen.dart';
+import 'package:uts_backend/pages/booking/choose_booking_schedule_screen.dart';
 
 void main() {
   testWidgets('shows loading indicator while fetching details', (
@@ -106,43 +107,47 @@ void main() {
     expect(find.byIcon(Icons.image_not_supported), findsWidgets);
   });
 
-  testWidgets('tapping booking button pushes a route', (
-    WidgetTester tester,
-  ) async {
-    final detail = VenueModel(
-      venueId: 9,
-      nama: 'Bookable',
-      kota: 'City',
-      deskripsi: 'Desc',
-      jamOperasional: '07:00 - 23:00',
-      jumlahLapangan: 2,
-      harga: 50000,
-      alamat: 'Addr',
-      linkGambar: ['https://example.com/x.jpg'],
-      fasilitas: [],
-    );
+  testWidgets(
+    'tapping booking button navigate to choose_booking_schedule_screen',
+    (WidgetTester tester) async {
+      final detail = VenueModel(
+        venueId: 9,
+        nama: 'Bookable',
+        kota: 'City',
+        deskripsi: 'Desc',
+        jamOperasional: '07:00 - 23:00',
+        jumlahLapangan: 2,
+        harga: 50000,
+        alamat: 'Addr',
+        linkGambar: ['https://example.com/x.jpg'],
+        fasilitas: [],
+      );
+      final observer = _TestNavigatorObserver();
 
-    bool booked = false;
-    await tester.pumpWidget(
-      MaterialApp(
-        home: VenueDetailScreen(
-          id: 9,
-          fetchDetails: (id) async => detail,
-          onBooking: (c, v) => booked = true,
+      await tester.pumpWidget(
+        MaterialApp(
+          home: VenueDetailScreen(id: 9, fetchDetails: (id) async => detail),
+          navigatorObservers: [observer],
         ),
-        navigatorObservers: [],
-      ),
-    );
+      );
 
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
 
-    expect(find.text('Booking'), findsOneWidget);
-    await tester.tap(find.text('Booking'));
-    await tester.pump();
+      expect(find.text('Booking'), findsOneWidget);
 
-    expect(booked, isTrue);
-  });
+      final elevated = find.byType(ElevatedButton);
+      final ElevatedButton btn = tester.widget<ElevatedButton>(elevated);
+      btn.onPressed?.call();
+
+      expect(observer.pushed.length, greaterThanOrEqualTo(1));
+
+      final lastRoute = observer.pushed.last as MaterialPageRoute<dynamic>;
+      final BuildContext ctx = tester.element(find.byType(VenueDetailScreen));
+      final destWidget = lastRoute.builder(ctx);
+      expect(destWidget, isA<ChooseBookingScheduleScreen>());
+    },
+  );
 
   testWidgets('facility icons correspond to fasilitas ids', (
     WidgetTester tester,
